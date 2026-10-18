@@ -1,501 +1,1301 @@
-/* ==========================================================
-   Metabolic Mind: myth-or-fact game
-   Vanilla JS, no dependencies, no data leaves the page.
-   Flow: intro -> worry -> routine -> 4 myth-or-fact cards -> readout + handoff
-   ========================================================== */
-(function () {
+(() => {
   "use strict";
 
-  var STEER_URL = "https://steerclub.com/";
+  // ============================================
+  // METABOLIC MIND — STEER HACKATHON
+  // Educational quiz, not a medical assessment.
+  // ============================================
 
-  /* ---------- Sources (each claim below is checked against these) ---------- */
-  var SOURCES = {
+  const STEER_URL = "https://steerclub.com/";
+
+  const SOURCES = {
     extension: {
-      label: "Weight regain after withdrawal: the STEP 1 trial extension (Wilding et al., Diabetes, Obesity and Metabolism, 2022)",
-      url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9542252/"
+      title: "STEP 1 trial extension — weight regain",
+      url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9542252/",
+      detail:
+        "Follow-up study of participants who stopped semaglutide and structured lifestyle intervention."
     },
+
     body: {
-      label: "STEP 1 body-composition (DEXA) analysis, an exploratory analysis",
-      url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8089287"
+      title: "STEP 1 body-composition analysis",
+      url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8089287/",
+      detail:
+        "Exploratory body-composition analysis using DEXA in a subset of trial participants."
     },
+
     sideEffects: {
-      label: "Understanding side effects of GLP-1 medicines (patient handout, lifestylemedicine.org)",
-      url: "https://lifestylemedicine.org/wp-content/uploads/2026/07/Patient-Handout-Understanding-Side-Effects-of-GLP-1-Medicines.pdf"
+      title: "Understanding side effects of GLP-1 medicines",
+      url:
+        "https://lifestylemedicine.org/wp-content/uploads/2026/07/Patient-Handout-Understanding-Side-Effects-of-GLP-1-Medicines.pdf",
+      detail:
+        "Patient education handout. Discuss individual symptoms and medication risks with a healthcare professional."
     },
-    asia: {
-      label: "STAT News opinion essay (Kantipuly and Singer), 17 March 2026: BMI and South Asian bodies",
-      url: "https://www.statnews.com/2026/03/17/generic-semaglutide-india-bmi-obesity-definition/"
+
+    eligibility: {
+      title: "STEP 1 trial publication",
+      url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8089287/",
+      detail:
+        "The STEP 1 study investigated semaglutide in adults with overweight or obesity without diabetes."
     }
   };
 
-  /* ---------- The four claims ---------- */
-  var FACTS = [
+  // ============================================
+  // QUIZ QUESTIONS
+  // ============================================
+
+  const FACTS = [
     {
       id: "eligibility",
-      statement: "GLP-1 medicines are only for people with diabetes.",
-      answer: "myth",
-      short: "No. The trial we cite enrolled adults without diabetes. A doctor decides if it fits you.",
-      explain: "The large STEP 1 trial tested one in adults without diabetes who had a BMI of 30 or more, or 27 or more with a weight-related condition. Whether a medicine suits you is a doctor's call, made from your labs and history. For South Asian bodies, health risk can also show up at lower BMIs, so doctors look at more than one number.",
-      steerLine: "At Steer, it starts with tests. Then a doctor decides if the programme fits, only when it's clinically right.",
-      sources: [SOURCES.extension, SOURCES.asia]
+
+      category: "ELIGIBILITY",
+
+      statement:
+        "GLP-1 medicines are only for people who have diabetes.",
+
+      answer: "Myth",
+
+      short: "Diabetes isn't the only possible reason",
+
+      explanation:
+        "Some GLP-1 medicines are also prescribed for chronic weight management in eligible people without diabetes. Eligibility depends on the particular medicine, its approved use, medical history and a clinician's assessment. The STEP 1 trial studied semaglutide in adults with overweight or obesity who did not have diabetes.",
+
+      takeaway:
+        "A doctor should determine whether a particular treatment is appropriate for you.",
+
+      doctorQuestions: [
+        "Am I eligible for a weight-management treatment based on my medical history?",
+        "What benefits and risks would this treatment have for me?",
+        "Are there other treatment options I should consider?"
+      ],
+
+      sources: ["eligibility"]
     },
+
     {
-      id: "sideeffects",
-      statement: "Most side effects are in the stomach, and often ease as your body adjusts.",
-      answer: "fact",
-      short: "It can cause side effects, mostly digestive. A doctor screens you first and starts low.",
-      explain: "Nausea, loose motions, constipation and bloating are the common ones, especially at the start or when the dose goes up. That's why providers start low and increase slowly. Less common problems exist too, and symptoms that don't settle need a call to your care team.",
-      steerLine: "Safety first: screening and blood tests come before any medicine.",
-      sources: [SOURCES.sideEffects]
+      id: "sideEffects",
+
+      category: "SIDE EFFECTS",
+
+      statement:
+        "Digestive side effects can happen with GLP-1 medicines and may improve over time.",
+
+      answer: "Fact",
+
+      short: "Digestive side effects can occur",
+
+      explanation:
+        "Nausea, vomiting, diarrhoea and constipation are among the possible gastrointestinal side effects of some GLP-1 medicines. Symptoms may improve over time, but this is not guaranteed. Side effects, precautions and serious risks differ by medicine. Never change your dose or stop treatment without appropriate medical guidance.",
+
+      takeaway:
+        "Ask your clinician what to expect, which symptoms need urgent attention, and whom to contact if symptoms persist.",
+
+      doctorQuestions: [
+        "Which side effects are common with the specific medicine being considered?",
+        "Which symptoms mean I should contact a clinician urgently?",
+        "How should side effects be managed safely?"
+      ],
+
+      sources: ["sideEffects"]
     },
+
     {
       id: "muscle",
-      statement: "On these medicines you lose only fat, never any lean mass.",
-      answer: "myth",
-      short: "Some lean mass is lost along with fat, so it's worth measuring and protecting.",
-      explain: "In one trial's DEXA sub-study, total lean body mass fell by about 9.7%. Fat mass fell too, by more, so lean mass made up a bigger share of body weight afterwards (up about 3 percentage points). It's an exploratory analysis, but it shows that some lean mass does go.",
-      steerLine: "That's why members get a DEXA scan, and the plan is built to protect muscle.",
-      sources: [SOURCES.body]
+
+      category: "BODY COMPOSITION",
+
+      statement:
+        "When people lose weight using these medicines, they lose fat but never lose lean body mass.",
+
+      answer: "Myth",
+
+      short: "Lean body mass can also decrease",
+
+      explanation:
+        "In an exploratory DEXA analysis of a subset of STEP 1 participants receiving semaglutide, total fat mass decreased and lean body mass also decreased. Lean body mass is not the same as skeletal muscle alone. The findings do not predict exactly what will happen to every individual.",
+
+      takeaway:
+        "Discuss nutrition, adequate protein intake and suitable resistance exercise with your healthcare professional.",
+
+      doctorQuestions: [
+        "How can I monitor changes in body composition during weight loss?",
+        "What nutrition and protein targets are suitable for me?",
+        "Would resistance training be appropriate for my circumstances?"
+      ],
+
+      sources: ["body"]
     },
+
     {
       id: "regain",
-      statement: "Once the weight is off, it stays off by itself.",
-      answer: "myth",
-      short: "Weight often returns after the medicine stops, so the plan after matters as much as the plan during.",
-      explain: "In the STEP 1 follow-up, people who stopped the medicine and the lifestyle programme regained about two-thirds of the weight they'd lost within a year, with no active lifestyle support in that year. The authors describe obesity as chronic, which fits how common regain is. It's biology pushing back, not a willpower failing.",
-      steerLine: "A planned exit: habits that last after the medicine stops.",
-      sources: [SOURCES.extension]
+
+      category: "LONG-TERM RESULTS",
+
+      statement:
+        "Once weight is lost, it will always stay off after stopping the medicine.",
+
+      answer: "Myth",
+
+      short: "Weight regain can happen",
+
+      explanation:
+        "In the STEP 1 extension, participants regained approximately two-thirds of their previous weight loss during the year after semaglutide and the structured lifestyle intervention were discontinued. This was a particular study population and follow-up period, not a prediction for every person.",
+
+      takeaway:
+        "Before starting treatment, discuss long-term management, follow-up and what the plan might be if treatment changes.",
+
+      doctorQuestions: [
+        "What is the long-term plan if I start this treatment?",
+        "What should I expect if treatment is stopped or changed?",
+        "How will we maintain progress and monitor my health over time?"
+      ],
+
+      sources: ["extension"]
     }
   ];
 
-  var FACTS_BY_ID = {};
-  FACTS.forEach(function (f) { FACTS_BY_ID[f.id] = f; });
+  // ============================================
+  // PERSONALIZATION OPTIONS
+  // ============================================
 
-  /* ---------- Worries and routines ---------- */
-  var DOUBTS = {
-    safety: {
-      label: "Is it safe?", sub: "Side effects, and what a doctor checks first", factId: "sideeffects",
-      doctorQs: [
-        "Which side effects should I expect first, and which ones mean I should call you?",
-        "Which tests do I need before starting anything?"
-      ]
+  const DOUBTS = [
+    {
+      id: "safety",
+      label: "Safety and side effects",
+      description: "I want to understand the risks.",
+      factId: "sideEffects"
     },
-    muscle: {
-      label: "Will I lose muscle?", sub: "Strength, energy and body composition", factId: "muscle",
-      doctorQs: [
-        "How will you track my muscle and body composition during the programme?",
-        "What should my meals and movement look like to protect muscle?"
-      ]
+    {
+      id: "muscle",
+      label: "Muscle loss",
+      description: "I am concerned about losing muscle.",
+      factId: "muscle"
     },
-    regain: {
-      label: "Will the weight come back?", sub: "Life after the medicine", factId: "regain",
-      doctorQs: [
-        "What is the plan for after the medicine stops?",
-        "How will we spot early if weight starts creeping back?"
-      ]
+    {
+      id: "regain",
+      label: "Weight regain",
+      description: "I want to understand long-term results.",
+      factId: "regain"
     },
-    eligibility: {
-      label: "Is it only for diabetics?", sub: "Who these medicines are for", factId: "eligibility",
-      doctorQs: [
-        "Do my numbers and history make me a candidate?",
-        "Do you use different cut-offs for South Asian bodies?"
-      ]
+    {
+      id: "eligibility",
+      label: "Eligibility",
+      description: "I want to know who these medicines are for.",
+      factId: "eligibility"
     },
-    personal: {
-      label: "Is it even for me?", sub: "I'm not sure it fits my life", factId: "eligibility",
-      short: "A quiz can't tell you that. A doctor looks at your labs, history and goals, and will say so if it isn't right for you.",
-      doctorQs: [
-        "What would you check first to see if this fits me?",
-        "What are my options if this isn't right for me?"
-      ]
+    {
+      id: "personal",
+      label: "I have several questions",
+      description: "Help me prepare for a doctor conversation.",
+      factId: "eligibility"
     }
-  };
+  ];
 
-  var ROUTINES = {
-    desk: {
-      label: "Desk job, long hours", sub: "Chai at the desk, lunch on the move",
-      doctorQ: "How should I plan meals and movement around long desk hours?"
+  const ROUTINES = [
+    {
+      id: "desk",
+      label: "Mostly sitting or studying",
+      description: "Long hours at a desk."
     },
-    home: {
-      label: "Home and family meals", sub: "Roti, rice and dal are the staples",
-      doctorQ: "How do we build the plan around the roti, rice and dal we already cook at home?"
+    {
+      id: "home",
+      label: "Mostly home-cooked meals",
+      description: "Meals such as rice, roti, dal and vegetables."
     },
-    shift: {
-      label: "Shifts, travel or eating out", sub: "My routine keeps changing",
-      doctorQ: "How does the plan work when my shifts, travel or eating out keep changing?"
+    {
+      id: "shift",
+      label: "Irregular hours",
+      description: "Shifts, travel or changing routines."
     },
-    social: {
-      label: "Weddings and family dinners", sub: "A busy social calendar",
-      doctorQ: "How do I handle weddings and family dinners without feeling like I'm on a diet?"
+    {
+      id: "social",
+      label: "Family meals and social events",
+      description: "My routine changes during gatherings."
     }
-  };
+  ];
 
-  /* ---------- Pure logic (unit-testable) ---------- */
-  function factOrder(doubtKey) {
-    var first = DOUBTS[doubtKey] ? DOUBTS[doubtKey].factId : FACTS[0].id;
-    var rest = FACTS.filter(function (f) { return f.id !== first; });
-    return [FACTS_BY_ID[first]].concat(rest);
+  // ============================================
+  // DOM REFERENCES
+  // ============================================
+
+  const game = document.querySelector(".game");
+  const stage = document.getElementById("stage");
+  const progress = document.getElementById("progress");
+  const progressLabel = document.getElementById("progressLabel");
+  const progressBar = document.getElementById("progressBar");
+
+  if (!game || !stage) {
+    console.error(
+      "Metabolic Mind: Required .game and #stage elements were not found."
+    );
+    return;
   }
 
-  function scoreGuesses(guesses) {
-    return FACTS.reduce(function (n, f) { return n + (guesses[f.id] === f.answer ? 1 : 0); }, 0);
+  const TOTAL_STEPS = 6;
+
+  const state = {
+    view: "intro",
+    index: 0,
+    doubt: null,
+    routine: null,
+    guesses: {}
+  };
+
+  const factById = Object.fromEntries(
+    FACTS.map((fact) => [fact.id, fact])
+  );
+
+  // ============================================
+  // SAFE DOM HELPERS
+  // ============================================
+
+  function createElement(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) {
+      element.className = className;
+    }
+
+    if (text !== undefined && text !== null) {
+      element.textContent = text;
+    }
+
+    return element;
   }
 
-  function orderedFacts(guesses) {
-    var rows = FACTS.map(function (f) {
-      return { fact: f, guess: guesses[f.id] || null, correct: guesses[f.id] === f.answer };
+  function createButton(text, action, className = "btn btn-primary") {
+    const button = createElement("button", className, text);
+
+    button.type = "button";
+    button.dataset.action = action;
+
+    return button;
+  }
+
+  function createLink(text, url) {
+    const link = createElement("a", "", text);
+
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    return link;
+  }
+
+  function createParagraph(text, className = "") {
+    return createElement("p", className, text);
+  }
+
+  function focusElement(element) {
+    if (!element) return;
+
+    requestAnimationFrame(() => {
+      element.focus({ preventScroll: true });
     });
-    // Facts the person missed come first. Array order is stable otherwise.
-    return rows.slice().sort(function (a, b) { return Number(a.correct) - Number(b.correct); });
   }
 
-  function doctorQuestions(doubtKey, routineKey) {
-    var d = DOUBTS[doubtKey], r = ROUTINES[routineKey];
-    if (!d || !r) return [];
-    return [d.doctorQs[0], d.doctorQs[1], r.doctorQ];
+  function mount(content, focusSelector = "h2") {
+    stage.replaceChildren(content);
+
+    if (focusSelector) {
+      focusElement(stage.querySelector(focusSelector));
+    }
   }
 
-  function buildHandoffUrl(doubtKey, routineKey, score) {
-    var url = new URL(STEER_URL);
-    url.searchParams.set("utm_source", "metabolic-mind");
-    url.searchParams.set("utm_medium", "quiz");
-    url.searchParams.set("utm_campaign", "myth-or-fact");
-    url.searchParams.set("utm_content", "worry-" + doubtKey + "_routine-" + routineKey + "_score-" + score);
-    return url.toString();
+  // ============================================
+  // VIEW AND PROGRESS
+  // ============================================
+
+  function setView(view) {
+  state.view = view;
+  game.dataset.view = view;
+
+  if (progress) {
+    progress.hidden = view !== "quiz";
   }
 
-  function buildSummary(state) {
-    var d = DOUBTS[state.doubt], r = ROUTINES[state.routine];
-    if (!d || !r) return "";
-    var score = scoreGuesses(state.guesses);
-    var qs = doctorQuestions(state.doubt, state.routine).map(function (q, i) { return (i + 1) + ". " + q; });
-    return [
-      "My Metabolic Mind summary",
-      "Loudest worry: " + d.label,
-      "My week: " + r.label,
-      "Myth-or-fact: " + score + " of " + FACTS.length,
+  if (view !== "quiz") {
+    return;
+  }
+
+  const stepNumber = state.index + 1;
+
+  if (progressLabel) {
+    progressLabel.textContent =
+      `Step ${stepNumber} of ${TOTAL_STEPS}`;
+  }
+
+  if (progressBar) {
+    const percentage = (stepNumber / TOTAL_STEPS) * 100;
+
+    progressBar.style.width = `${percentage}%`;
+    progressBar.setAttribute("aria-valuenow", stepNumber);
+  }
+}
+  // ============================================
+  // INTRO
+  // ============================================
+
+  function showIntro() {
+    setView("intro");
+
+    const intro = createElement("section", "step intro");
+
+    const kicker = createElement(
+      "p",
+      "kicker",
+      "A 60-second myth-or-fact game"
+    );
+
+    const heading = createElement(
+      "h1",
       "",
-      "Questions I want to ask a doctor:"
-    ].concat(qs).concat(["", "From steerclub.com. Educational only, not medical advice."]).join("\n");
+      "GLP-1: What's fact, and what's fiction?"
+    );
+
+    heading.tabIndex = -1;
+
+    const lede = createParagraph(
+      "Muscle loss? Side effects? Weight regain? Test what you know in four quick questions. Get research-based explanations and questions to discuss with your doctor.",
+      "lede"
+    );
+
+    const start = createButton(
+      "Test my knowledge →",
+      "start",
+      "btn btn-primary btn-large"
+    );
+
+    const chips = createElement("ul", "chips");
+
+    [
+      "4 quick questions",
+      "No login required",
+      "Sources included"
+    ].forEach((label) => {
+      chips.append(createElement("li", "", label));
+    });
+
+    const aside = createElement(
+      "p",
+      "aside",
+      "Curiosity first. Evidence before assumptions."
+    );
+
+    intro.append(kicker, heading, lede, start, chips, aside);
+
+    mount(intro, "h1");
   }
 
-  var api = {
-    FACTS: FACTS, DOUBTS: DOUBTS, ROUTINES: ROUTINES,
-    factOrder: factOrder, scoreGuesses: scoreGuesses, orderedFacts: orderedFacts,
-    doctorQuestions: doctorQuestions, buildHandoffUrl: buildHandoffUrl, buildSummary: buildSummary
-  };
-  if (typeof module !== "undefined" && module.exports) module.exports = api;
-  if (typeof document === "undefined") return;
+  // ============================================
+  // STEP 1: CHOOSE YOUR MAIN QUESTION
+  // ============================================
 
-  /* ---------- DOM helpers ---------- */
-  function h(tag, props) {
-    var el = document.createElement(tag);
-    var p = props || {};
-    Object.keys(p).forEach(function (k) {
-      var v = p[k];
-      if (v === false || v === null || v === undefined) return;
-      if (k === "class") el.className = v;
-      else if (k === "text") el.textContent = v;
-      else if (k === "checked" || k === "disabled" || k === "hidden") el[k] = !!v;
-      else el.setAttribute(k, v === true ? "" : v);
+  function renderDoubtStep() {
+    setView("quiz");
+
+    const section = createElement("section", "step");
+
+    const kicker = createElement(
+      "p",
+      "kicker",
+      "FIRST, LET'S START WITH YOU"
+    );
+
+    const heading = createElement(
+      "h2",
+      "",
+      "What are you most curious about?"
+    );
+
+    heading.tabIndex = -1;
+
+    const help = createParagraph(
+      "Choose the topic you'd most like to understand."
+    );
+
+    const form = createElement("div", "options");
+
+    DOUBTS.forEach((doubt) => {
+      const label = createElement("label", "option");
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "doubt";
+      input.value = doubt.id;
+      input.checked = state.doubt === doubt.id;
+
+      const textWrap = createElement("span", "");
+
+      textWrap.append(
+        createElement("span", "option-title", doubt.label),
+        createElement("span", "option-sub", doubt.description)
+      );
+
+      label.append(input, textWrap);
+
+      if (input.checked) {
+        label.classList.add("is-checked");
+      }
+
+      form.append(label);
     });
-    for (var i = 2; i < arguments.length; i++) {
-      var kids = [].concat(arguments[i]);
-      for (var j = 0; j < kids.length; j++) {
-        var c = kids[j];
-        if (c === null || c === undefined || c === false) continue;
-        el.append(c.nodeType ? c : document.createTextNode(String(c)));
+
+    const nav = createElement("div", "nav");
+
+    const next = createButton("Continue →", "next");
+    next.disabled = !state.doubt;
+
+    nav.append(next);
+
+    section.append(kicker, heading, help, form, nav);
+
+    mount(section, "h2");
+  }
+
+  // ============================================
+  // STEP 2: CHOOSE YOUR ROUTINE
+  // ============================================
+
+  function renderRoutineStep() {
+    setView("quiz");
+
+    const section = createElement("section", "step");
+
+    const kicker = createElement(
+      "p",
+      "kicker",
+      "YOUR EVERYDAY ROUTINE"
+    );
+
+    const heading = createElement(
+      "h2",
+      "",
+      "What does a typical day look like?"
+    );
+
+    heading.tabIndex = -1;
+
+    const help = createParagraph(
+      "This helps tailor the questions you can take to your doctor."
+    );
+
+    const form = createElement("div", "options");
+
+    ROUTINES.forEach((routine) => {
+      const label = createElement("label", "option");
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "routine";
+      input.value = routine.id;
+      input.checked = state.routine === routine.id;
+
+      const textWrap = createElement("span", "");
+
+      textWrap.append(
+        createElement("span", "option-title", routine.label),
+        createElement("span", "option-sub", routine.description)
+      );
+
+      label.append(input, textWrap);
+
+      if (input.checked) {
+        label.classList.add("is-checked");
+      }
+
+      form.append(label);
+    });
+
+    const nav = createElement("div", "nav");
+
+    nav.append(
+      createButton("← Back", "back", "btn btn-ghost"),
+      createButton("Start the quiz →", "next")
+    );
+
+    section.append(kicker, heading, help, form, nav);
+
+    mount(section, "h2");
+  }
+
+  // ============================================
+  // ORDER QUESTIONS BY USER'S MAIN CONCERN
+  // ============================================
+
+  function getOrderedFacts() {
+    const selectedDoubt = DOUBTS.find(
+      (item) => item.id === state.doubt
+    );
+
+    if (!selectedDoubt) {
+      return [...FACTS];
+    }
+
+    const priority = factById[selectedDoubt.factId];
+
+    return [
+      priority,
+      ...FACTS.filter((fact) => fact.id !== selectedDoubt.factId)
+    ];
+  }
+
+  function getFactForStep() {
+    const ordered = getOrderedFacts();
+
+    // Step indexes 2, 3, 4 and 5 correspond to the four facts.
+    return ordered[state.index - 2];
+  }
+
+  // ============================================
+  // SOURCE LINKS
+  // ============================================
+
+  function createSources(sourceIds) {
+    const wrapper = createElement("div", "source-list");
+
+    wrapper.append(
+      createElement("p", "source-line", "Research and further reading:")
+    );
+
+    const list = createElement("ul", "source-links");
+
+    sourceIds.forEach((sourceId) => {
+      const source = SOURCES[sourceId];
+
+      if (!source) return;
+
+      const item = createElement("li", "");
+
+      item.append(createLink(source.title, source.url));
+
+      if (source.detail) {
+        item.append(
+          createParagraph(source.detail, "source-line")
+        );
+      }
+
+      list.append(item);
+    });
+
+    wrapper.append(list);
+
+    return wrapper;
+  }
+
+  // ============================================
+  // STEP 3–6: MYTH OR FACT
+  // ============================================
+
+  function renderFactStep() {
+    setView("quiz");
+
+    const fact = getFactForStep();
+
+    if (!fact) {
+      renderResults();
+      return;
+    }
+
+    const section = createElement("section", "step");
+
+    const kicker = createElement(
+      "p",
+      "kicker",
+      `QUESTION ${state.index - 1} OF 4 · ${fact.category}`
+    );
+
+    const heading = createElement(
+      "h2",
+      "",
+      "Myth or fact?"
+    );
+
+    heading.tabIndex = -1;
+
+    const statement = createElement(
+      "p",
+      "statement",
+      `“${fact.statement}”`
+    );
+
+    const verdicts = createElement("div", "verdicts");
+
+    const mythButton = createButton(
+      "Myth",
+      "guess",
+      "btn btn-verdict"
+    );
+
+    mythButton.dataset.answer = "Myth";
+
+    const factButton = createButton(
+      "Fact",
+      "guess",
+      "btn btn-verdict"
+    );
+
+    factButton.dataset.answer = "Fact";
+
+    verdicts.append(mythButton, factButton);
+
+    const nav = createElement("div", "nav");
+
+    const back = createButton(
+      "← Back",
+      "back",
+      "btn btn-ghost"
+    );
+
+    nav.append(back);
+
+    section.append(kicker, heading, statement, verdicts);
+
+    const previousGuess = state.guesses[fact.id];
+
+    if (previousGuess) {
+      revealAnswer(section, fact, previousGuess);
+    } else {
+      const hint = createParagraph(
+        "Choose an answer to reveal the explanation and sources.",
+        "help"
+      );
+
+      section.append(hint);
+    }
+
+    const next = createButton(
+      state.index === TOTAL_STEPS - 1
+        ? "See my results →"
+        : "Next question →",
+      "next"
+    );
+
+    next.disabled = !previousGuess;
+
+    nav.append(next);
+
+    section.append(nav);
+
+    mount(section, "h2");
+
+    // Restore selected answer styling after returning to a question.
+    if (previousGuess) {
+      const chosen = stage.querySelector(
+        `[data-answer="${previousGuess}"]`
+      );
+
+      if (chosen) {
+        chosen.classList.add("is-chosen");
       }
     }
-    return el;
   }
 
-  function sourceLinks(sources) {
-    var out = [];
-    sources.forEach(function (s, i) {
-      if (i > 0) out.push("; ");
-      out.push(h("a", { href: s.url, target: "_blank", rel: "noopener noreferrer" }, s.label));
+  // ============================================
+  // ANSWER EXPLANATION
+  // ============================================
+
+  function revealAnswer(section, fact, guess) {
+    const reveal = createElement("div", "reveal");
+
+    reveal.setAttribute("aria-live", "polite");
+    reveal.tabIndex = -1;
+
+    const correct = guess === fact.answer;
+
+    const verdict = createElement(
+      "p",
+      "reveal-verdict",
+      correct
+        ? "✓ You got it!"
+        : "Here's the evidence."
+    );
+
+    const answer = createParagraph(
+      `Answer: ${fact.answer}`
+    );
+
+    const explanation = createParagraph(fact.explanation);
+
+    const takeaway = createParagraph(
+      fact.takeaway,
+      "steer-line"
+    );
+
+    reveal.append(
+      verdict,
+      answer,
+      explanation,
+      takeaway,
+      createSources(fact.sources)
+    );
+
+    section.append(reveal);
+
+    return reveal;
+  }
+
+  // ============================================
+  // RESULT HELPERS
+  // ============================================
+
+  function calculateScore() {
+    return FACTS.reduce((score, fact) => {
+      return score + (
+        state.guesses[fact.id] === fact.answer ? 1 : 0
+      );
+    }, 0);
+  }
+
+  function getScoreMessage(score) {
+    if (score === 4) {
+      return {
+        title: "4 out of 4 — excellent!",
+        message:
+          "You identified all four answers. Keep checking evidence and remember that individual treatment decisions belong with a qualified clinician."
+      };
+    }
+
+    if (score === 3) {
+      return {
+        title: "3 out of 4 — great work!",
+        message:
+          "You understood most of these claims. Review the remaining explanation to strengthen your understanding."
+      };
+    }
+
+    if (score === 2) {
+      return {
+        title: "2 out of 4 — a good start",
+        message:
+          "Health claims can be confusing. Read the explanations and sources to learn more about the topics you missed."
+      };
+    }
+
+    return {
+      title: `${score} out of 4 — let's learn together`,
+      message:
+        "There is a lot of conflicting information about these medicines. Explore each explanation and use the doctor questions to guide a conversation with a healthcare professional."
+    };
+  }
+
+  function getSelectedDoubt() {
+    return DOUBTS.find((item) => item.id === state.doubt)
+      || DOUBTS[DOUBTS.length - 1];
+  }
+
+  function getSelectedRoutine() {
+    return ROUTINES.find((item) => item.id === state.routine)
+      || ROUTINES[0];
+  }
+
+  function getDoctorQuestions() {
+    const selectedDoubt = getSelectedDoubt();
+    const selectedRoutine = getSelectedRoutine();
+
+    const mainFact = factById[selectedDoubt.factId];
+
+    const questions = [...mainFact.doctorQuestions];
+
+    if (selectedRoutine.id === "desk") {
+      questions.push(
+        "What physical activity goals would be realistic for my daily routine?"
+      );
+    } else if (selectedRoutine.id === "home") {
+      questions.push(
+        "How can I build a balanced meal plan that fits my food preferences?"
+      );
+    } else if (selectedRoutine.id === "shift") {
+      questions.push(
+        "How can I plan meals, sleep and medication routines around changing hours?"
+      );
+    } else if (selectedRoutine.id === "social") {
+      questions.push(
+        "How can I manage my routine during social events without an all-or-nothing approach?"
+      );
+    }
+
+    return questions;
+  }
+
+  // ============================================
+  // SUMMARY FOR COPYING
+  // ============================================
+
+  function buildSummary() {
+    const selectedDoubt = getSelectedDoubt();
+    const selectedRoutine = getSelectedRoutine();
+    const score = calculateScore();
+
+    const lines = [
+      "METABOLIC MIND — QUIZ SUMMARY",
+      "",
+      `Score: ${score}/4`,
+      `Main concern: ${selectedDoubt.label}`,
+      `Routine: ${selectedRoutine.label}`,
+      "",
+      "QUESTIONS TO DISCUSS WITH A HEALTHCARE PROFESSIONAL:"
+    ];
+
+    getDoctorQuestions().forEach((question, index) => {
+      lines.push(`${index + 1}. ${question}`);
     });
-    return out;
+
+    lines.push(
+      "",
+      "This is an educational quiz, not a diagnosis or treatment recommendation.",
+      "Source: Metabolic Mind"
+    );
+
+    return lines.join("\n");
   }
 
-  /* ---------- State ---------- */
-  var TOTAL_STEPS = 6; // worry, routine, 4 claims
-  var state = { view: "intro", index: 0, doubt: null, routine: null, guesses: {} };
-
-  var game, stage, progress, progressBar, progressLabel, introHTML;
-
-  function currentOrder() { return factOrder(state.doubt); }
-
-  /* ---------- Mounting ---------- */
-  function setView(view) {
-    state.view = view;
-    game.setAttribute("data-view", view);
-    var inQuiz = view === "quiz";
-    progress.hidden = !inQuiz;
-    if (inQuiz) {
-      var n = state.index + 1;
-      progressLabel.textContent = "Step " + n + " of " + TOTAL_STEPS;
-      progressBar.style.width = Math.round((n / TOTAL_STEPS) * 100) + "%";
-      progress.querySelector("[role=progressbar]").setAttribute("aria-valuenow", String(n));
-    }
-  }
-
-  function mount(node, focusSelector) {
-    stage.replaceChildren(node);
-    if (stage.scrollIntoView) stage.scrollIntoView({ block: "start" });
-    var target = node.querySelector(focusSelector || "[data-focus]");
-    if (target) target.focus({ preventScroll: true });
-  }
-
-  /* ---------- Screens ---------- */
-  function showIntro(focus) {
-    state.index = 0;
-    stage.innerHTML = introHTML; // our own static markup, captured at start-up
-    setView("intro");
-    if (focus) {
-      var t = stage.querySelector("[data-focus], h1");
-      if (t) t.focus({ preventScroll: true });
-    }
-  }
-
-  function renderStep() {
-    setView("quiz");
-    if (state.index === 0) return mount(choiceStep("doubt"));
-    if (state.index === 1) return mount(choiceStep("routine"));
-    return mount(mythStep(currentOrder()[state.index - 2]));
-  }
-
-  function choiceStep(kind) {
-    var isDoubt = kind === "doubt";
-    var data = isDoubt ? DOUBTS : ROUTINES;
-    var selected = isDoubt ? state.doubt : state.routine;
-    var title = isDoubt ? "Which worry is loudest in your head?" : "What does a normal week look like?";
-    var help = isDoubt
-      ? "The one you'd ask a friend about over chai. Pick one."
-      : "No right answer. This only helps tailor the questions you'll take to a doctor.";
-
-    var options = Object.keys(data).map(function (key) {
-      var item = data[key];
-      var input = h("input", { type: "radio", name: kind, value: key, checked: selected === key });
-      return h("label", { class: "option" + (selected === key ? " is-checked" : "") },
-        input,
-        h("span", {},
-          h("span", { class: "option-title" }, item.label),
-          h("span", { class: "option-sub" }, item.sub)));
-    });
-
-    return h("section", { class: "step", "aria-labelledby": "stepTitle" },
-      h("p", { class: "kicker" }, "Step " + (state.index + 1) + " of " + TOTAL_STEPS),
-      h("h2", { id: "stepTitle", tabindex: "-1", "data-focus": true }, title),
-      h("p", { class: "help" }, help),
-      h("fieldset", { class: "options" },
-        h("legend", { class: "sr-only" }, title),
-        options),
-      h("div", { class: "nav" },
-        h("button", { class: "btn btn-ghost", type: "button", "data-action": "back" }, "Back"),
-        h("button", { class: "btn btn-primary", type: "button", "data-action": "next", disabled: !selected }, "Continue")));
-  }
-
-  function revealNode(fact, guess) {
-    var correct = guess === fact.answer;
-    var verdict = correct
-      ? "You called it: it's a " + fact.answer + "."
-      : "Plenty of people guess otherwise. It's a " + fact.answer + ".";
-    return h("div", { class: "reveal", id: "reveal", tabindex: "-1" },
-      h("p", { class: "reveal-verdict" }, verdict),
-      h("p", {}, fact.explain),
-      h("p", { class: "steer-line" }, fact.steerLine),
-      h("p", { class: "source-line" }, "Source: ", sourceLinks(fact.sources)));
-  }
-
-  function mythStep(fact) {
-    var n = state.index - 1; // 1..4
-    var guess = state.guesses[fact.id] || null;
-    var last = state.index === TOTAL_STEPS - 1;
-
-    function verdictBtn(value, label) {
-      return h("button", {
-        class: "btn btn-verdict" + (guess === value ? " is-chosen" : ""),
-        type: "button", "data-action": "guess", "data-guess": value,
-        "aria-pressed": guess ? String(guess === value) : "false",
-        disabled: !!guess
-      }, label);
-    }
-
-    return h("section", { class: "step", "aria-labelledby": "stepTitle" },
-      h("p", { class: "kicker" }, "Myth or fact? Claim " + n + " of " + FACTS.length),
-      h("h2", { id: "stepTitle", class: "statement", tabindex: "-1", "data-focus": true }, "\u201C" + fact.statement + "\u201D"),
-      h("div", { class: "verdicts", role: "group", "aria-labelledby": "stepTitle" },
-        verdictBtn("myth", "Myth"), verdictBtn("fact", "Fact")),
-      h("div", { id: "revealSlot" }, guess ? revealNode(fact, guess) : null),
-      h("div", { class: "nav" },
-        h("button", { class: "btn btn-ghost", type: "button", "data-action": "back" }, "Back"),
-        h("button", { class: "btn btn-primary", type: "button", "data-action": "next", hidden: !guess },
-          last ? "See my readout" : "Next claim")));
-  }
+  // ============================================
+  // RESULTS SCREEN
+  // ============================================
 
   function renderResults() {
-    var d = DOUBTS[state.doubt], r = ROUTINES[state.routine];
-    if (!d || !r) return showIntro(true);
     setView("results");
 
-    var score = scoreGuesses(state.guesses);
-    var main = FACTS_BY_ID[d.factId];
-    var rows = orderedFacts(state.guesses);
-    var qs = doctorQuestions(state.doubt, state.routine);
+    const section = createElement("section", "step results");
 
-    var factItems = rows.map(function (row) {
-      var f = row.fact;
-      var note = row.guess
-        ? "You said " + row.guess + ". " + (row.correct ? "Right." : "Worth knowing.")
-        : "";
-      return h("details", { open: !row.correct },
-        h("summary", {}, "\u201C" + f.statement + "\u201D"),
-        h("div", { class: "fact-body" },
-          h("p", { class: "guess-note" }, note + " It's a " + f.answer + "."),
-          h("p", {}, f.explain),
-          h("p", { class: "source-line" }, "Source: ", sourceLinks(f.sources))));
+    const kicker = createElement(
+      "p",
+      "kicker",
+      "YOUR RESULTS"
+    );
+
+    const heading = createElement(
+      "h2",
+      "",
+      "Knowledge grows one question at a time."
+    );
+
+    heading.tabIndex = -1;
+
+    const score = calculateScore();
+    const scoreMessage = getScoreMessage(score);
+
+    const scoreCard = createElement("div", "answer-card");
+
+    scoreCard.append(
+      createElement("p", "kicker", "YOUR QUIZ SCORE"),
+      createElement("h3", "", scoreMessage.title),
+      createParagraph(scoreMessage.message),
+      createParagraph(
+        "This score reflects your answers to these four questions only. It does not assess your health or determine whether a medicine is suitable for you.",
+        "guess-note"
+      )
+    );
+
+    // Personalized topic.
+    const doubt = getSelectedDoubt();
+    const routine = getSelectedRoutine();
+
+    const personalized = createElement(
+      "div",
+      "answer-card"
+    );
+
+    personalized.append(
+      createElement("h3", "", "Your focus"),
+      createParagraph(
+        `You chose: ${doubt.label}.`
+      ),
+      createParagraph(
+        `Your selected routine: ${routine.label}.`
+      ),
+      createParagraph(
+        "Use these selections to help prepare for a conversation with a healthcare professional. They do not determine your eligibility for treatment."
+      )
+    );
+
+    // Review all answers.
+    const factsSection = createElement("section", "facts");
+
+    factsSection.append(
+      createElement("h3", "", "Review all four claims")
+    );
+
+    const ordered = getOrderedFacts();
+
+    ordered.forEach((fact) => {
+      const details = document.createElement("details");
+
+      const summary = createElement(
+        "summary",
+        "",
+        `${state.guesses[fact.id] === fact.answer ? "✓" : "↗"} ${fact.category}: ${fact.answer}`
+      );
+
+      const body = createElement("div", "fact-body");
+
+      body.append(
+        createElement("p", "option-title", fact.statement),
+        createParagraph(`Your answer: ${state.guesses[fact.id]}`),
+        createParagraph(`Evidence-based answer: ${fact.answer}`),
+        createParagraph(fact.explanation),
+        createParagraph(fact.takeaway, "steer-line"),
+        createSources(fact.sources)
+      );
+
+      details.append(summary, body);
+
+      // Open the claims the user answered incorrectly.
+      if (state.guesses[fact.id] !== fact.answer) {
+        details.open = true;
+      }
+
+      factsSection.append(details);
     });
 
-    var node = h("section", { class: "step results", "aria-labelledby": "stepTitle" },
-      h("div", {},
-        h("p", { class: "kicker" }, "Your readout"),
-        h("h2", { id: "stepTitle", tabindex: "-1", "data-focus": true },
-          "You called ", h("em", {}, score + " of " + FACTS.length), ". Here's what to take with you.")),
+    // Doctor questions.
+    const questionSection = createElement(
+      "section",
+      "answer-card"
+    );
 
-      h("div", { class: "answer-card" },
-        h("p", { class: "kicker" }, "Your loudest worry"),
-        h("h3", {}, d.label),
-        h("p", {}, d.short || main.short),
-        h("p", { class: "steer-line" }, main.steerLine)),
+    questionSection.append(
+      createElement("h3", "", "Questions to take to your doctor"),
+      createParagraph(
+        "These are conversation starters, not personalized medical advice."
+      )
+    );
 
-      h("div", { class: "facts" },
-        h("h3", {}, "All four claims, with sources"),
-        factItems),
+    const questionList = createElement("ol", "questions");
 
-      h("div", {},
-        h("h3", {}, "Three questions to take to a doctor"),
-        h("p", { class: "help" }, "Built from your worry and your week."),
-        h("ol", { class: "questions" }, qs.map(function (q) { return h("li", {}, q); }))),
+    getDoctorQuestions().forEach((question) => {
+      questionList.append(
+        createElement("li", "", question)
+      );
+    });
 
-      h("div", { class: "handoff on-maroon" },
-        h("p", { class: "kicker" }, "Next step, only if you want it"),
-        h("h3", {}, "Want a doctor to look at ", h("em", {}, "your"), " numbers?"),
-        h("p", {}, "Steer starts with diagnostics, then a doctor decides if the programme fits you. If it isn't right for you, they'll say so."),
-        h("p", { class: "aside" }, "No obligation. Ask away."),
-        h("div", { class: "handoff-actions" },
-          h("a", {
-            class: "btn btn-light", id: "handoffLink", href: buildHandoffUrl(state.doubt, state.routine, score),
-            target: "_blank", rel: "noopener noreferrer"
-          }, "See if the programme fits you"),
-          h("button", { class: "btn btn-outline-light", type: "button", "data-action": "copy" }, "Copy my summary")),
-        h("p", { class: "copy-status", id: "copyStatus", role: "status" }),
-        h("textarea", { id: "summaryText", readonly: true, hidden: true, "aria-label": "Your summary, ready to copy" })),
+    questionSection.append(questionList);
 
-      h("div", { class: "replay" },
-        h("button", { class: "btn btn-ghost", type: "button", "data-action": "restart" }, "Play again")));
+    const copyButton = createButton(
+      "Copy my summary",
+      "copy",
+      "btn btn-primary"
+    );
 
-    mount(node);
+    const copyStatus = createElement(
+      "p",
+      "copy-status",
+      ""
+    );
+
+    copyStatus.id = "copyStatus";
+    copyStatus.setAttribute("role", "status");
+    copyStatus.setAttribute("aria-live", "polite");
+
+    const summaryText = document.createElement("textarea");
+
+    summaryText.id = "summaryText";
+    summaryText.readOnly = true;
+    summaryText.hidden = true;
+    summaryText.setAttribute(
+      "aria-label",
+      "Quiz summary for copying"
+    );
+
+    questionSection.append(
+      copyButton,
+      copyStatus,
+      summaryText
+    );
+
+    // Handoff section.
+    const handoff = createElement("section", "handoff");
+
+    handoff.append(
+      createElement("p", "kicker", "YOUR NEXT STEP"),
+      createElement("h3", "", "Take your questions to a healthcare professional"),
+      createParagraph(
+        "Use what you learned to have an informed conversation. A qualified clinician can help you understand appropriate options, benefits, risks and alternatives."
+      )
+    );
+
+    const actions = createElement("div", "handoff-actions");
+
+    const steerLink = createElement(
+      "a",
+      "btn btn-light",
+      "Visit Steer →"
+    );
+
+    steerLink.href = STEER_URL;
+    steerLink.target = "_blank";
+    steerLink.rel = "noopener noreferrer";
+
+    const restart = createButton(
+      "Play again",
+      "restart",
+      "btn btn-outline-light"
+    );
+
+    actions.append(steerLink, restart);
+
+    handoff.append(actions);
+
+    const disclaimer = createParagraph(
+      "Educational information only. This quiz does not diagnose a condition, establish treatment eligibility or replace medical advice. Medication approvals and recommendations differ by product and country."
+    );
+
+    disclaimer.className = "guess-note";
+
+    section.append(
+      kicker,
+      heading,
+      scoreCard,
+      personalized,
+      factsSection,
+      questionSection,
+      handoff,
+      disclaimer
+    );
+
+    mount(section, "h2");
   }
 
-  /* ---------- Events ---------- */
-  function onClick(e) {
-    var btn = e.target.closest("[data-action]");
-    if (!btn || !stage.contains(btn) || btn.disabled) return;
-    var action = btn.getAttribute("data-action");
+  // ============================================
+  // NAVIGATION
+  // ============================================
 
-    if (action === "start") { state.index = 0; renderStep(); }
-    else if (action === "back") {
-      if (state.index > 0) { state.index--; renderStep(); } else showIntro(true);
-    }
-    else if (action === "next") {
-      if (state.index === 0 && !state.doubt) return;
-      if (state.index === 1 && !state.routine) return;
-      if (state.index >= 2 && !state.guesses[currentOrder()[state.index - 2].id]) return;
-      if (state.index < TOTAL_STEPS - 1) { state.index++; renderStep(); } else renderResults();
-    }
-    else if (action === "guess") {
-      var fact = currentOrder()[state.index - 2];
-      if (!fact || state.guesses[fact.id]) return;
-      state.guesses[fact.id] = btn.getAttribute("data-guess");
-      // Re-render this card in its answered state, then move focus to the explanation.
-      var node = mythStep(fact);
-      stage.replaceChildren(node);
-      var reveal = node.querySelector("#reveal");
-      if (reveal) reveal.focus({ preventScroll: false });
-    }
-    else if (action === "restart") {
-      state = { view: "intro", index: 0, doubt: null, routine: null, guesses: {} };
-      showIntro(true);
-    }
-    else if (action === "copy") copySummary();
-  }
-
-  function onChange(e) {
-    var input = e.target;
-    if (!input || input.type !== "radio") return;
-    if (input.name === "doubt") state.doubt = input.value;
-    if (input.name === "routine") state.routine = input.value;
-    var group = stage.querySelectorAll("input[name=" + input.name + "]");
-    for (var i = 0; i < group.length; i++) {
-      group[i].closest(".option").classList.toggle("is-checked", group[i].checked);
-    }
-    var next = stage.querySelector("[data-action=next]");
-    if (next) next.disabled = false;
-  }
-
-  function copySummary() {
-    var text = buildSummary(state);
-    var status = document.getElementById("copyStatus");
-    var box = document.getElementById("summaryText");
-
-    function fallback() {
-      box.hidden = false;
-      box.value = text;
-      box.focus();
-      box.select();
-      status.textContent = "Couldn't copy automatically. The text is selected, so copy it from here.";
-    }
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        status.textContent = "Copied. Paste it into WhatsApp or share it with your doctor.";
-      }, fallback);
+  function renderCurrentStep() {
+    if (state.index === 0) {
+      renderDoubtStep();
+    } else if (state.index === 1) {
+      renderRoutineStep();
+    } else if (state.index >= 2 && state.index < TOTAL_STEPS) {
+      renderFactStep();
     } else {
-      fallback();
+      renderResults();
     }
   }
 
-  /* ---------- Start-up ---------- */
-  function init() {
-    game = document.getElementById("game");
-    stage = document.getElementById("stage");
-    progress = document.getElementById("progress");
-    progressBar = document.getElementById("progressBar");
-    progressLabel = document.getElementById("progressLabel");
-    if (!game || !stage || !progress || !progressBar || !progressLabel) throw new Error("Game markup is missing");
-    var intro = stage.querySelector(".intro");
-    introHTML = intro ? intro.outerHTML : "";
-    if (!introHTML) throw new Error("Intro markup is missing");
-    stage.addEventListener("click", onClick);
-    stage.addEventListener("change", onChange);
+  function startQuiz() {
+    state.index = 0;
+    state.doubt = null;
+    state.routine = null;
+    state.guesses = {};
+
+    renderCurrentStep();
   }
 
-  function start() {
-    try {
-      init();
-    } catch (err) {
-      var stageEl = document.getElementById("stage");
-      if (stageEl) {
-        stageEl.replaceChildren(h("div", { class: "noscript", role: "alert" },
-          h("h2", {}, "Something went wrong"),
-          h("p", {}, "The game didn't load. Please refresh the page and try again.")));
+  function goBack() {
+    if (state.view !== "quiz") return;
+
+    if (state.index === 0) {
+      showIntro();
+      return;
+    }
+
+    state.index -= 1;
+
+    renderCurrentStep();
+  }
+
+  function goNext() {
+    if (state.view !== "quiz") return;
+
+    if (state.index === 0 && !state.doubt) {
+      const heading = stage.querySelector("h2");
+      if (heading) {
+        heading.textContent =
+          "Choose a topic before continuing.";
+        focusElement(heading);
       }
-      if (window.console) console.error(err);
+      return;
+    }
+
+    if (state.index === 1 && !state.routine) {
+      const heading = stage.querySelector("h2");
+      if (heading) {
+        heading.textContent =
+          "Choose the routine that best describes your day.";
+        focusElement(heading);
+      }
+      return;
+    }
+
+    if (state.index >= 2) {
+      const fact = getFactForStep();
+
+      if (!fact || !state.guesses[fact.id]) {
+        const hint = stage.querySelector(".help");
+
+        if (hint) {
+          hint.textContent =
+            "Choose Myth or Fact before moving to the next question.";
+        }
+
+        return;
+      }
+    }
+
+    if (state.index < TOTAL_STEPS - 1) {
+      state.index += 1;
+      renderCurrentStep();
+    } else {
+      renderResults();
     }
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
-  else start();
+  // ============================================
+  // ANSWER SELECTION
+  // ============================================
+
+  function chooseAnswer(answer) {
+    const fact = getFactForStep();
+
+    if (!fact || !["Myth", "Fact"].includes(answer)) {
+      return;
+    }
+
+    // Save or update the answer.
+    state.guesses[fact.id] = answer;
+
+    renderFactStep();
+  }
+
+  // ============================================
+  // COPY SUMMARY
+  // ============================================
+
+  async function copySummary() {
+    const summary = buildSummary();
+
+    const status = document.getElementById("copyStatus");
+    const textarea = document.getElementById("summaryText");
+
+    try {
+      await navigator.clipboard.writeText(summary);
+
+      if (status) {
+        status.textContent =
+          "Summary copied. You can paste it into your notes.";
+      }
+
+      return;
+    } catch (error) {
+      // Clipboard API may be unavailable on some browsers.
+    }
+
+    if (textarea) {
+      textarea.hidden = false;
+      textarea.value = summary;
+      textarea.focus();
+      textarea.select();
+
+      let copied = false;
+
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {
+        copied = false;
+      }
+
+      if (status) {
+        status.textContent = copied
+          ? "Summary copied."
+          : "Select the text above and copy it manually.";
+      }
+    }
+  }
+
+  // ============================================
+  // EVENT DELEGATION
+  // ============================================
+
+  stage.addEventListener("change", (event) => {
+    const input = event.target;
+
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+
+    if (input.name === "doubt") {
+      state.doubt = input.value;
+
+      stage.querySelectorAll('input[name="doubt"]').forEach((item) => {
+        item.closest(".option")?.classList.toggle(
+          "is-checked",
+          item.checked
+        );
+      });
+
+      const next = stage.querySelector('[data-action="next"]');
+
+      if (next) {
+        next.disabled = !state.doubt;
+      }
+    }
+
+    if (input.name === "routine") {
+      state.routine = input.value;
+
+      stage.querySelectorAll('input[name="routine"]').forEach((item) => {
+        item.closest(".option")?.classList.toggle(
+          "is-checked",
+          item.checked
+        );
+      });
+    }
+  });
+
+  stage.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-action]");
+
+    if (!button || !stage.contains(button)) {
+      return;
+    }
+
+    const action = button.dataset.action;
+
+    switch (action) {
+      case "start":
+        startQuiz();
+        break;
+
+      case "back":
+        goBack();
+        break;
+
+      case "next":
+        goNext();
+        break;
+
+      case "guess":
+        chooseAnswer(button.dataset.answer);
+        break;
+
+      case "restart":
+        showIntro();
+        break;
+
+      case "copy":
+        await copySummary();
+        break;
+
+      default:
+        break;
+    }
+  });
+
+  // ============================================
+  // START
+  // ============================================
+
+  showIntro();
+
+  // Optional test access for automated checks.
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+      FACTS,
+      DOUBTS,
+      ROUTINES,
+      calculateScore,
+      buildSummary,
+      getScoreMessage
+    };
+  }
 })();
