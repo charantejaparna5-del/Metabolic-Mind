@@ -2,70 +2,232 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Metabolic Mind | Four GLP-1 claims. Myth or fact?</title>
-  <meta name="description" content="A 60-second myth-or-fact game about GLP-1 medicines. No login. Every answer comes with a source.">
-  <meta name="theme-color" content="#F5EBDF">
-  <meta property="og:title" content="Four things you've heard about GLP-1 medicines. Which are true?">
-  <meta property="og:description" content="A 60-second myth-or-fact game. No login. Every answer has a source.">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23C04E2A'/%3E%3C/svg%3E">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#F5EBDF"
+  >
+
+  <meta
+    name="description"
+    content="Explore four common claims about GLP-1 medicines in this quick myth-or-fact quiz. Learn from research sources and prepare questions for your healthcare professional."
+  >
+
+  <title>Metabolic Mind | GLP-1 Myth or Fact?</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Main JavaScript -->
   <script src="script.js" defer></script>
 </head>
-<body>
-  <a class="skip-link" href="#game">Skip to the game</a>
 
+<body>
+
+  <!-- Accessibility: skip directly to the quiz -->
+  <a class="skip-link" href="#game">
+    Skip to quiz
+  </a>
+
+  <!-- Header -->
   <header class="site-header">
-    <span class="wordmark">steer</span>
-    <span class="project">metabolic mind</span>
+
+   <a class="brand" href="https://steerclub.com/">
+  <span class="brand-mark" aria-hidden="true">M</span>
+  <span class="brand-name">Metabolic Mind</span>
+</a>
+    <span class="project">
+      An evidence-first experience
+    </span>
+
   </header>
 
-  <main id="main">
-    <div class="game" id="game" data-view="intro">
-      <div class="progress" id="progress" hidden>
-        <p class="progress-label" id="progressLabel">Step 1 of 6</p>
-        <div class="progress-track" role="progressbar" aria-labelledby="progressLabel"
-             aria-valuemin="1" aria-valuemax="6" aria-valuenow="1">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
-      </div>
+  <!-- Main application -->
+  <main id="main-content">
 
-      <div class="stage" id="stage">
-        <section class="step intro" aria-labelledby="introTitle">
-          <p class="kicker">A 60-second myth-or-fact game</p>
-          <h1 id="introTitle" tabindex="-1">Four things you've heard about <em>GLP-1 medicines.</em> Which are true?</h1>
-          <p class="lede">Safe? Muscle loss? Weight coming back? Only for diabetics? Get straight answers, with sources, before you talk to anyone.</p>
-          <button class="btn btn-light btn-large" type="button" data-action="start">Take the 60-second test</button>
+    <div
+      class="game"
+      id="game"
+      data-view="intro"
+    >
+
+      <!-- Progress indicator -->
+      <section
+        class="progress"
+        id="progress"
+        aria-label="Quiz progress"
+        hidden
+      >
+
+        <p
+          class="progress-label"
+          id="progressLabel"
+        >
+          Step 1 of 6
+        </p>
+
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-labelledby="progressLabel"
+          aria-valuemin="0"
+          aria-valuemax="6"
+          aria-valuenow="0"
+          id="progressTrack"
+        >
+
+          <div
+            class="progress-bar"
+            id="progressBar"
+          ></div>
+
+        </div>
+
+      </section>
+
+      <!-- JavaScript renders each quiz step here -->
+      <div
+        class="stage"
+        id="stage"
+        aria-live="polite"
+        aria-atomic="false"
+      >
+
+        <!-- Intro content is rendered by script.js -->
+
+        <section class="step intro">
+
+          <p class="kicker">
+            A 60-second myth-or-fact game
+          </p>
+
+          <h1>
+            GLP-1: What's fact, and what's fiction?
+          </h1>
+
+          <p class="lede">
+            Muscle loss? Side effects? Weight regain?
+            Explore four common claims, learn what research
+            says, and prepare questions for your doctor.
+          </p>
+
+          <button
+            class="btn btn-primary btn-large"
+            type="button"
+            data-action="start"
+          >
+            Test my knowledge →
+          </button>
+
           <ul class="chips">
-            <li>No login</li>
-            <li>About a minute</li>
-            <li>Every answer has a source</li>
+            <li>4 quick questions</li>
+            <li>No login required</li>
+            <li>Research sources included</li>
           </ul>
-          <p class="aside">Before you start, hear it from a doctor, not a reel.</p>
+
+          <p class="aside">
+            Curiosity first. Evidence before assumptions.
+          </p>
+
         </section>
 
-        <noscript>
-          <div class="noscript">
-            <h2>This game needs JavaScript</h2>
-            <p>Please turn it on and refresh. In the meantime, here are the sources behind the answers:</p>
-            <ul>
-              <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9542252/">STEP 1 trial extension: weight regain after withdrawal</a></li>
-              <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8089287">STEP 1 body-composition (DEXA) analysis</a></li>
-              <li><a href="https://lifestylemedicine.org/wp-content/uploads/2026/07/Patient-Handout-Understanding-Side-Effects-of-GLP-1-Medicines.pdf">Patient handout on side effects</a></li>
-            </ul>
-          </div>
-        </noscript>
       </div>
+
     </div>
+
+    <!-- Shown when JavaScript is disabled -->
+    <noscript>
+
+      <section class="noscript">
+
+        <h2>JavaScript is required</h2>
+
+        <p>
+          Please enable JavaScript in your browser to play
+          the Metabolic Mind quiz.
+        </p>
+
+        <p>
+          You can still explore the research sources below.
+        </p>
+
+        <ul>
+          <li>
+            <a
+              href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9542252/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              STEP 1 extension: weight regain after treatment
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8089287/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              STEP 1 body-composition analysis
+            </a>
+          </li>
+        </ul>
+
+      </section>
+
+    </noscript>
+
   </main>
 
+  <!-- Footer -->
   <footer class="site-footer">
-    <p>Educational only. This isn't a diagnosis or medical advice, and it doesn't replace a doctor. The answers draw on published trials of one GLP-1 medicine; other medicines and individual people can differ.</p>
-    <p><a href="https://steerclub.com/">steerclub.com</a></p>
+
+    <p>
+      <strong>About this experience</strong>
+    </p>
+
+    <p>
+      Metabolic Mind is an educational myth-or-fact quiz.
+      It is not a medical diagnosis, treatment recommendation,
+      or assessment of your eligibility for medication.
+    </p>
+
+    <p>
+      Research findings may relate to a specific medicine,
+      study population, and treatment period. Individual
+      benefits and risks can differ.
+    </p>
+
+    <p>
+      Always discuss medical questions with a qualified
+      healthcare professional.
+    </p>
+
+    <p>
+      <a
+        href="https://steerclub.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Visit steer
+      </a>
+    </p>
+
   </footer>
+
 </body>
 </html>
