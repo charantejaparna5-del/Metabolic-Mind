@@ -1,619 +1,501 @@
-// ==========================================
-// METABOLIC MIND
-// Research Radar + Learning Quiz
-// ==========================================
+/* ==========================================================
+   Metabolic Mind: myth-or-fact game
+   Vanilla JS, no dependencies, no data leaves the page.
+   Flow: intro -> worry -> routine -> 4 myth-or-fact cards -> readout + handoff
+   ========================================================== */
+(function () {
+  "use strict";
 
+  var STEER_URL = "https://steerclub.com/";
 
-// ---------- RESEARCH SEARCH & FILTERS ----------
+  /* ---------- Sources (each claim below is checked against these) ---------- */
+  var SOURCES = {
+    extension: {
+      label: "Weight regain after withdrawal: the STEP 1 trial extension (Wilding et al., Diabetes, Obesity and Metabolism, 2022)",
+      url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9542252/"
+    },
+    body: {
+      label: "STEP 1 body-composition (DEXA) analysis, an exploratory analysis",
+      url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8089287"
+    },
+    sideEffects: {
+      label: "Understanding side effects of GLP-1 medicines (patient handout, lifestylemedicine.org)",
+      url: "https://lifestylemedicine.org/wp-content/uploads/2026/07/Patient-Handout-Understanding-Side-Effects-of-GLP-1-Medicines.pdf"
+    },
+    asia: {
+      label: "STAT News opinion essay (Kantipuly and Singer), 17 March 2026: BMI and South Asian bodies",
+      url: "https://www.statnews.com/2026/03/17/generic-semaglutide-india-bmi-obesity-definition/"
+    }
+  };
 
-const searchInput = document.getElementById("researchSearch");
+  /* ---------- The four claims ---------- */
+  var FACTS = [
+    {
+      id: "eligibility",
+      statement: "GLP-1 medicines are only for people with diabetes.",
+      answer: "myth",
+      short: "No. The trial we cite enrolled adults without diabetes. A doctor decides if it fits you.",
+      explain: "The large STEP 1 trial tested one in adults without diabetes who had a BMI of 30 or more, or 27 or more with a weight-related condition. Whether a medicine suits you is a doctor's call, made from your labs and history. For South Asian bodies, health risk can also show up at lower BMIs, so doctors look at more than one number.",
+      steerLine: "At Steer, it starts with tests. Then a doctor decides if the programme fits, only when it's clinically right.",
+      sources: [SOURCES.extension, SOURCES.asia]
+    },
+    {
+      id: "sideeffects",
+      statement: "Most side effects are in the stomach, and often ease as your body adjusts.",
+      answer: "fact",
+      short: "It can cause side effects, mostly digestive. A doctor screens you first and starts low.",
+      explain: "Nausea, loose motions, constipation and bloating are the common ones, especially at the start or when the dose goes up. That's why providers start low and increase slowly. Less common problems exist too, and symptoms that don't settle need a call to your care team.",
+      steerLine: "Safety first: screening and blood tests come before any medicine.",
+      sources: [SOURCES.sideEffects]
+    },
+    {
+      id: "muscle",
+      statement: "On these medicines you lose only fat, never any lean mass.",
+      answer: "myth",
+      short: "Some lean mass is lost along with fat, so it's worth measuring and protecting.",
+      explain: "In one trial's DEXA sub-study, total lean body mass fell by about 9.7%. Fat mass fell too, by more, so lean mass made up a bigger share of body weight afterwards (up about 3 percentage points). It's an exploratory analysis, but it shows that some lean mass does go.",
+      steerLine: "That's why members get a DEXA scan, and the plan is built to protect muscle.",
+      sources: [SOURCES.body]
+    },
+    {
+      id: "regain",
+      statement: "Once the weight is off, it stays off by itself.",
+      answer: "myth",
+      short: "Weight often returns after the medicine stops, so the plan after matters as much as the plan during.",
+      explain: "In the STEP 1 follow-up, people who stopped the medicine and the lifestyle programme regained about two-thirds of the weight they'd lost within a year, with no active lifestyle support in that year. The authors describe obesity as chronic, which fits how common regain is. It's biology pushing back, not a willpower failing.",
+      steerLine: "A planned exit: habits that last after the medicine stops.",
+      sources: [SOURCES.extension]
+    }
+  ];
 
-const researchCards = [
-    ...document.querySelectorAll(".research-card")
-];
+  var FACTS_BY_ID = {};
+  FACTS.forEach(function (f) { FACTS_BY_ID[f.id] = f; });
 
-const filterButtons = [
-    ...document.querySelectorAll(".filter-chip")
-];
+  /* ---------- Worries and routines ---------- */
+  var DOUBTS = {
+    safety: {
+      label: "Is it safe?", sub: "Side effects, and what a doctor checks first", factId: "sideeffects",
+      doctorQs: [
+        "Which side effects should I expect first, and which ones mean I should call you?",
+        "Which tests do I need before starting anything?"
+      ]
+    },
+    muscle: {
+      label: "Will I lose muscle?", sub: "Strength, energy and body composition", factId: "muscle",
+      doctorQs: [
+        "How will you track my muscle and body composition during the programme?",
+        "What should my meals and movement look like to protect muscle?"
+      ]
+    },
+    regain: {
+      label: "Will the weight come back?", sub: "Life after the medicine", factId: "regain",
+      doctorQs: [
+        "What is the plan for after the medicine stops?",
+        "How will we spot early if weight starts creeping back?"
+      ]
+    },
+    eligibility: {
+      label: "Is it only for diabetics?", sub: "Who these medicines are for", factId: "eligibility",
+      doctorQs: [
+        "Do my numbers and history make me a candidate?",
+        "Do you use different cut-offs for South Asian bodies?"
+      ]
+    },
+    personal: {
+      label: "Is it even for me?", sub: "I'm not sure it fits my life", factId: "eligibility",
+      short: "A quiz can't tell you that. A doctor looks at your labs, history and goals, and will say so if it isn't right for you.",
+      doctorQs: [
+        "What would you check first to see if this fits me?",
+        "What are my options if this isn't right for me?"
+      ]
+    }
+  };
 
-const resultCount = document.getElementById("resultCount");
-const emptyState = document.getElementById("emptyState");
+  var ROUTINES = {
+    desk: {
+      label: "Desk job, long hours", sub: "Chai at the desk, lunch on the move",
+      doctorQ: "How should I plan meals and movement around long desk hours?"
+    },
+    home: {
+      label: "Home and family meals", sub: "Roti, rice and dal are the staples",
+      doctorQ: "How do we build the plan around the roti, rice and dal we already cook at home?"
+    },
+    shift: {
+      label: "Shifts, travel or eating out", sub: "My routine keeps changing",
+      doctorQ: "How does the plan work when my shifts, travel or eating out keep changing?"
+    },
+    social: {
+      label: "Weddings and family dinners", sub: "A busy social calendar",
+      doctorQ: "How do I handle weddings and family dinners without feeling like I'm on a diet?"
+    }
+  };
 
-let activeFilter = "all";
+  /* ---------- Pure logic (unit-testable) ---------- */
+  function factOrder(doubtKey) {
+    var first = DOUBTS[doubtKey] ? DOUBTS[doubtKey].factId : FACTS[0].id;
+    var rest = FACTS.filter(function (f) { return f.id !== first; });
+    return [FACTS_BY_ID[first]].concat(rest);
+  }
 
+  function scoreGuesses(guesses) {
+    return FACTS.reduce(function (n, f) { return n + (guesses[f.id] === f.answer ? 1 : 0); }, 0);
+  }
 
-function filterResearch() {
+  function orderedFacts(guesses) {
+    var rows = FACTS.map(function (f) {
+      return { fact: f, guess: guesses[f.id] || null, correct: guesses[f.id] === f.answer };
+    });
+    // Facts the person missed come first. Array order is stable otherwise.
+    return rows.slice().sort(function (a, b) { return Number(a.correct) - Number(b.correct); });
+  }
 
-    const query = searchInput.value.trim().toLowerCase();
+  function doctorQuestions(doubtKey, routineKey) {
+    var d = DOUBTS[doubtKey], r = ROUTINES[routineKey];
+    if (!d || !r) return [];
+    return [d.doctorQs[0], d.doctorQs[1], r.doctorQ];
+  }
 
-    let visibleCount = 0;
+  function buildHandoffUrl(doubtKey, routineKey, score) {
+    var url = new URL(STEER_URL);
+    url.searchParams.set("utm_source", "metabolic-mind");
+    url.searchParams.set("utm_medium", "quiz");
+    url.searchParams.set("utm_campaign", "myth-or-fact");
+    url.searchParams.set("utm_content", "worry-" + doubtKey + "_routine-" + routineKey + "_score-" + score);
+    return url.toString();
+  }
 
-    researchCards.forEach((card) => {
+  function buildSummary(state) {
+    var d = DOUBTS[state.doubt], r = ROUTINES[state.routine];
+    if (!d || !r) return "";
+    var score = scoreGuesses(state.guesses);
+    var qs = doctorQuestions(state.doubt, state.routine).map(function (q, i) { return (i + 1) + ". " + q; });
+    return [
+      "My Metabolic Mind summary",
+      "Loudest worry: " + d.label,
+      "My week: " + r.label,
+      "Myth-or-fact: " + score + " of " + FACTS.length,
+      "",
+      "Questions I want to ask a doctor:"
+    ].concat(qs).concat(["", "From steerclub.com. Educational only, not medical advice."]).join("\n");
+  }
 
-        const topic = card.dataset.topic;
+  var api = {
+    FACTS: FACTS, DOUBTS: DOUBTS, ROUTINES: ROUTINES,
+    factOrder: factOrder, scoreGuesses: scoreGuesses, orderedFacts: orderedFacts,
+    doctorQuestions: doctorQuestions, buildHandoffUrl: buildHandoffUrl, buildSummary: buildSummary
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  if (typeof document === "undefined") return;
 
-        const topicMatches =
-            activeFilter === "all" ||
-            topic === activeFilter;
+  /* ---------- DOM helpers ---------- */
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    var p = props || {};
+    Object.keys(p).forEach(function (k) {
+      var v = p[k];
+      if (v === false || v === null || v === undefined) return;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k === "checked" || k === "disabled" || k === "hidden") el[k] = !!v;
+      else el.setAttribute(k, v === true ? "" : v);
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      var kids = [].concat(arguments[i]);
+      for (var j = 0; j < kids.length; j++) {
+        var c = kids[j];
+        if (c === null || c === undefined || c === false) continue;
+        el.append(c.nodeType ? c : document.createTextNode(String(c)));
+      }
+    }
+    return el;
+  }
 
-        const searchableText = (
-            card.innerText + " " +
-            (card.dataset.search || "")
-        ).toLowerCase();
+  function sourceLinks(sources) {
+    var out = [];
+    sources.forEach(function (s, i) {
+      if (i > 0) out.push("; ");
+      out.push(h("a", { href: s.url, target: "_blank", rel: "noopener noreferrer" }, s.label));
+    });
+    return out;
+  }
 
-        const searchMatches =
-            searchableText.includes(query);
+  /* ---------- State ---------- */
+  var TOTAL_STEPS = 6; // worry, routine, 4 claims
+  var state = { view: "intro", index: 0, doubt: null, routine: null, guesses: {} };
 
-        const shouldShow =
-            topicMatches && searchMatches;
+  var game, stage, progress, progressBar, progressLabel, introHTML;
 
-        card.hidden = !shouldShow;
+  function currentOrder() { return factOrder(state.doubt); }
 
-        if (shouldShow) {
-            visibleCount++;
-        }
+  /* ---------- Mounting ---------- */
+  function setView(view) {
+    state.view = view;
+    game.setAttribute("data-view", view);
+    var inQuiz = view === "quiz";
+    progress.hidden = !inQuiz;
+    if (inQuiz) {
+      var n = state.index + 1;
+      progressLabel.textContent = "Step " + n + " of " + TOTAL_STEPS;
+      progressBar.style.width = Math.round((n / TOTAL_STEPS) * 100) + "%";
+      progress.querySelector("[role=progressbar]").setAttribute("aria-valuenow", String(n));
+    }
+  }
 
+  function mount(node, focusSelector) {
+    stage.replaceChildren(node);
+    if (stage.scrollIntoView) stage.scrollIntoView({ block: "start" });
+    var target = node.querySelector(focusSelector || "[data-focus]");
+    if (target) target.focus({ preventScroll: true });
+  }
+
+  /* ---------- Screens ---------- */
+  function showIntro(focus) {
+    state.index = 0;
+    stage.innerHTML = introHTML; // our own static markup, captured at start-up
+    setView("intro");
+    if (focus) {
+      var t = stage.querySelector("[data-focus], h1");
+      if (t) t.focus({ preventScroll: true });
+    }
+  }
+
+  function renderStep() {
+    setView("quiz");
+    if (state.index === 0) return mount(choiceStep("doubt"));
+    if (state.index === 1) return mount(choiceStep("routine"));
+    return mount(mythStep(currentOrder()[state.index - 2]));
+  }
+
+  function choiceStep(kind) {
+    var isDoubt = kind === "doubt";
+    var data = isDoubt ? DOUBTS : ROUTINES;
+    var selected = isDoubt ? state.doubt : state.routine;
+    var title = isDoubt ? "Which worry is loudest in your head?" : "What does a normal week look like?";
+    var help = isDoubt
+      ? "The one you'd ask a friend about over chai. Pick one."
+      : "No right answer. This only helps tailor the questions you'll take to a doctor.";
+
+    var options = Object.keys(data).map(function (key) {
+      var item = data[key];
+      var input = h("input", { type: "radio", name: kind, value: key, checked: selected === key });
+      return h("label", { class: "option" + (selected === key ? " is-checked" : "") },
+        input,
+        h("span", {},
+          h("span", { class: "option-title" }, item.label),
+          h("span", { class: "option-sub" }, item.sub)));
     });
 
-    resultCount.textContent =
-        `${String(visibleCount).padStart(2, "0")} RESOURCES`;
+    return h("section", { class: "step", "aria-labelledby": "stepTitle" },
+      h("p", { class: "kicker" }, "Step " + (state.index + 1) + " of " + TOTAL_STEPS),
+      h("h2", { id: "stepTitle", tabindex: "-1", "data-focus": true }, title),
+      h("p", { class: "help" }, help),
+      h("fieldset", { class: "options" },
+        h("legend", { class: "sr-only" }, title),
+        options),
+      h("div", { class: "nav" },
+        h("button", { class: "btn btn-ghost", type: "button", "data-action": "back" }, "Back"),
+        h("button", { class: "btn btn-primary", type: "button", "data-action": "next", disabled: !selected }, "Continue")));
+  }
 
-    emptyState.hidden = visibleCount !== 0;
-}
+  function revealNode(fact, guess) {
+    var correct = guess === fact.answer;
+    var verdict = correct
+      ? "You called it: it's a " + fact.answer + "."
+      : "Plenty of people guess otherwise. It's a " + fact.answer + ".";
+    return h("div", { class: "reveal", id: "reveal", tabindex: "-1" },
+      h("p", { class: "reveal-verdict" }, verdict),
+      h("p", {}, fact.explain),
+      h("p", { class: "steer-line" }, fact.steerLine),
+      h("p", { class: "source-line" }, "Source: ", sourceLinks(fact.sources)));
+  }
 
+  function mythStep(fact) {
+    var n = state.index - 1; // 1..4
+    var guess = state.guesses[fact.id] || null;
+    var last = state.index === TOTAL_STEPS - 1;
 
-if (searchInput) {
-    searchInput.addEventListener("input", filterResearch);
-}
-
-
-filterButtons.forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-        activeFilter = button.dataset.filter;
-
-        filterButtons.forEach((item) => {
-
-            const isActive = item === button;
-
-            item.classList.toggle("active", isActive);
-
-            item.setAttribute(
-                "aria-pressed",
-                String(isActive)
-            );
-
-        });
-
-        filterResearch();
-
-    });
-
-});
-
-
-// ---------- MOBILE NAVIGATION ----------
-
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
-
-
-if (menuToggle && navLinks) {
-
-    menuToggle.addEventListener("click", () => {
-
-        const isOpen = navLinks.classList.toggle("open");
-
-        menuToggle.setAttribute(
-            "aria-expanded",
-            String(isOpen)
-        );
-
-        menuToggle.textContent = isOpen ? "×" : "☰";
-
-    });
-
-
-    navLinks.querySelectorAll("a").forEach((link) => {
-
-        link.addEventListener("click", () => {
-
-            navLinks.classList.remove("open");
-
-            menuToggle.setAttribute("aria-expanded", "false");
-
-            menuToggle.textContent = "☰";
-
-        });
-
-    });
-
-}
-
-
-// ---------- QUIZ QUESTIONS ----------
-
-const questions = [
-
-    {
-        title: "What would you most like to understand?",
-        help: "Choose the topic that feels most useful to you.",
-        answers: [
-            {
-                label: "How metabolism and blood sugar work",
-                value: "basics"
-            },
-            {
-                label: "Food, nutrition and everyday eating",
-                value: "nutrition"
-            },
-            {
-                label: "Movement, strength and energy",
-                value: "movement"
-            },
-            {
-                label: "Sleep, stress and daily habits",
-                value: "sleep"
-            }
-        ]
-    },
-
-    {
-        title: "What kind of information helps you learn?",
-        help: "Pick the format you would most like to explore.",
-        answers: [
-            {
-                label: "A beginner-friendly explanation",
-                value: "basics"
-            },
-            {
-                label: "Practical nutrition guidance",
-                value: "nutrition"
-            },
-            {
-                label: "Scientific studies and evidence",
-                value: "research"
-            },
-            {
-                label: "Everyday habits and routines",
-                value: "sleep"
-            }
-        ]
-    },
-
-    {
-        title: "Which area would you like to explore first?",
-        help: "Choose your current learning interest.",
-        answers: [
-            {
-                label: "Insulin and glucose",
-                value: "basics"
-            },
-            {
-                label: "Balanced eating patterns",
-                value: "nutrition"
-            },
-            {
-                label: "Physical activity and fitness",
-                value: "movement"
-            },
-            {
-                label: "Sleep and recovery",
-                value: "sleep"
-            }
-        ]
-    },
-
-    {
-        title: "How do you prefer to get started?",
-        help: "Choose an approach that feels manageable.",
-        answers: [
-            {
-                label: "Learn one simple concept",
-                value: "basics"
-            },
-            {
-                label: "Read a practical overview",
-                value: "nutrition"
-            },
-            {
-                label: "Compare research sources",
-                value: "research"
-            },
-            {
-                label: "Explore one habit at a time",
-                value: "sleep"
-            }
-        ]
-    },
-
-    {
-        title: "What would make learning useful for you?",
-        help: "Select the outcome you hope to get from this experience.",
-        answers: [
-            {
-                label: "Understand health terms and measurements",
-                value: "basics"
-            },
-            {
-                label: "Ask informed questions about food",
-                value: "nutrition"
-            },
-            {
-                label: "Learn how to read research",
-                value: "research"
-            },
-            {
-                label: "Understand everyday health habits",
-                value: "sleep"
-            }
-        ]
+    function verdictBtn(value, label) {
+      return h("button", {
+        class: "btn btn-verdict" + (guess === value ? " is-chosen" : ""),
+        type: "button", "data-action": "guess", "data-guess": value,
+        "aria-pressed": guess ? String(guess === value) : "false",
+        disabled: !!guess
+      }, label);
     }
 
-];
-
-
-// ---------- LEARNING RECOMMENDATIONS ----------
-
-const recommendations = {
-
-    basics: {
-        title: "Metabolic Basics",
-
-        description:
-            "Start with how the body uses glucose, what insulin does, and why metabolic health involves more than one measurement.",
-
-        links: [
-            {
-                label: "NIDDK: Insulin Resistance",
-                url: "https://www.niddk.nih.gov/health-information/diabetes/overview/what-is-diabetes/prediabetes-insulin-resistance"
-            }
-        ]
-    },
-
-    nutrition: {
-        title: "Nutrition Without the Noise",
-
-        description:
-            "Explore balanced-diet guidance from a public-health source and use it as a foundation for further learning.",
-
-        links: [
-            {
-                label: "WHO: Healthy Diet",
-                url: "https://www.who.int/news-room/fact-sheets/detail/healthy-diet"
-            }
-        ]
-    },
-
-    movement: {
-        title: "Movement in Everyday Life",
-
-        description:
-            "Explore public-health physical-activity guidance and consider which forms of movement are practical for you.",
-
-        links: [
-            {
-                label: "WHO: Physical Activity",
-                url: "https://www.who.int/news-room/fact-sheets/detail/physical-activity"
-            }
-        ]
-    },
-
-    sleep: {
-        title: "Sleep and Daily Habits",
-
-        description:
-            "Learn basic sleep-health principles and explore habits that can support a consistent sleep routine.",
-
-        links: [
-            {
-                label: "CDC: Sleep Information",
-                url: "https://www.cdc.gov/sleep/"
-            }
-        ]
-    },
-
-    research: {
-        title: "Learn to Read Research",
-
-        description:
-            "Practise checking who was studied, what was measured, and what limitations the researchers describe.",
-
-        links: [
-            {
-                label: "PubMed: Search Research",
-                url: "https://pubmed.ncbi.nlm.nih.gov/"
-            }
-        ]
-    }
-
-};
-
-
-// ---------- QUIZ STATE ----------
-
-const selectedAnswers = Array(questions.length).fill(null);
-
-let currentQuestion = 0;
-
-
-const questionTitle = document.getElementById("questionTitle");
-const questionHelp = document.getElementById("questionHelp");
-const answerList = document.getElementById("answerList");
-
-const quizStepLabel = document.getElementById("quizStepLabel");
-const quizStepCount = document.getElementById("quizStepCount");
-
-const progressBar = document.getElementById("progressBar");
-
-const backButton = document.getElementById("backButton");
-const nextButton = document.getElementById("nextButton");
-
-const quizPanel = document.getElementById("quizPanel");
-const resultsPanel = document.getElementById("resultsPanel");
-
-
-// ---------- DISPLAY QUESTION ----------
-
-function renderQuestion() {
-
-    const question = questions[currentQuestion];
-
-    questionTitle.textContent = question.title;
-    questionHelp.textContent = question.help;
-
-    // Display question number.
-    quizStepLabel.textContent =
-        `QUESTION ${String(currentQuestion + 1).padStart(2, "0")}`;
-
-    // Add a separator between the question label and counter.
-    quizStepCount.textContent =
-        `· ${currentQuestion + 1} OF ${questions.length}`;
-
-    // Update progress.
-    progressBar.style.width =
-        `${((currentQuestion + 1) / questions.length) * 100}%`;
-
-    // Update Back button.
-    backButton.disabled = currentQuestion === 0;
-
-    // Enable Continue only after an answer is selected.
-    nextButton.disabled =
-        selectedAnswers[currentQuestion] === null;
-
-    // Update the final button label.
-    nextButton.textContent =
-        currentQuestion === questions.length - 1
-            ? "See my learning path →"
-            : "Continue →";
-
-    // Remove previous answers.
-    answerList.replaceChildren();
-
-
-    // Create answer buttons.
-    question.answers.forEach((answer, index) => {
-
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = "answer-option";
-
-        const isSelected =
-            selectedAnswers[currentQuestion] === answer.value;
-
-        if (isSelected) {
-            button.classList.add("selected");
-        }
-
-        button.setAttribute(
-            "aria-pressed",
-            String(isSelected)
-        );
-
-
-        // Answer letter.
-        const marker = document.createElement("span");
-
-        marker.className = "answer-marker";
-        marker.textContent = String.fromCharCode(65 + index);
-
-
-        // Answer text.
-        const label = document.createElement("span");
-
-        label.className = "answer-text";
-        label.textContent = answer.label;
-
-
-        button.append(marker, label);
-
-
-        // Save selected answer.
-        button.addEventListener("click", () => {
-
-            selectedAnswers[currentQuestion] = answer.value;
-
-            renderQuestion();
-
-        });
-
-
-        answerList.appendChild(button);
-
+    return h("section", { class: "step", "aria-labelledby": "stepTitle" },
+      h("p", { class: "kicker" }, "Myth or fact? Claim " + n + " of " + FACTS.length),
+      h("h2", { id: "stepTitle", class: "statement", tabindex: "-1", "data-focus": true }, "\u201C" + fact.statement + "\u201D"),
+      h("div", { class: "verdicts", role: "group", "aria-labelledby": "stepTitle" },
+        verdictBtn("myth", "Myth"), verdictBtn("fact", "Fact")),
+      h("div", { id: "revealSlot" }, guess ? revealNode(fact, guess) : null),
+      h("div", { class: "nav" },
+        h("button", { class: "btn btn-ghost", type: "button", "data-action": "back" }, "Back"),
+        h("button", { class: "btn btn-primary", type: "button", "data-action": "next", hidden: !guess },
+          last ? "See my readout" : "Next claim")));
+  }
+
+  function renderResults() {
+    var d = DOUBTS[state.doubt], r = ROUTINES[state.routine];
+    if (!d || !r) return showIntro(true);
+    setView("results");
+
+    var score = scoreGuesses(state.guesses);
+    var main = FACTS_BY_ID[d.factId];
+    var rows = orderedFacts(state.guesses);
+    var qs = doctorQuestions(state.doubt, state.routine);
+
+    var factItems = rows.map(function (row) {
+      var f = row.fact;
+      var note = row.guess
+        ? "You said " + row.guess + ". " + (row.correct ? "Right." : "Worth knowing.")
+        : "";
+      return h("details", { open: !row.correct },
+        h("summary", {}, "\u201C" + f.statement + "\u201D"),
+        h("div", { class: "fact-body" },
+          h("p", { class: "guess-note" }, note + " It's a " + f.answer + "."),
+          h("p", {}, f.explain),
+          h("p", { class: "source-line" }, "Source: ", sourceLinks(f.sources))));
     });
 
-}
+    var node = h("section", { class: "step results", "aria-labelledby": "stepTitle" },
+      h("div", {},
+        h("p", { class: "kicker" }, "Your readout"),
+        h("h2", { id: "stepTitle", tabindex: "-1", "data-focus": true },
+          "You called ", h("em", {}, score + " of " + FACTS.length), ". Here's what to take with you.")),
 
+      h("div", { class: "answer-card" },
+        h("p", { class: "kicker" }, "Your loudest worry"),
+        h("h3", {}, d.label),
+        h("p", {}, d.short || main.short),
+        h("p", { class: "steer-line" }, main.steerLine)),
 
-// ---------- BACK BUTTON ----------
+      h("div", { class: "facts" },
+        h("h3", {}, "All four claims, with sources"),
+        factItems),
 
-backButton.addEventListener("click", () => {
+      h("div", {},
+        h("h3", {}, "Three questions to take to a doctor"),
+        h("p", { class: "help" }, "Built from your worry and your week."),
+        h("ol", { class: "questions" }, qs.map(function (q) { return h("li", {}, q); }))),
 
-    if (currentQuestion > 0) {
+      h("div", { class: "handoff on-maroon" },
+        h("p", { class: "kicker" }, "Next step, only if you want it"),
+        h("h3", {}, "Want a doctor to look at ", h("em", {}, "your"), " numbers?"),
+        h("p", {}, "Steer starts with diagnostics, then a doctor decides if the programme fits you. If it isn't right for you, they'll say so."),
+        h("p", { class: "aside" }, "No obligation. Ask away."),
+        h("div", { class: "handoff-actions" },
+          h("a", {
+            class: "btn btn-light", id: "handoffLink", href: buildHandoffUrl(state.doubt, state.routine, score),
+            target: "_blank", rel: "noopener noreferrer"
+          }, "See if the programme fits you"),
+          h("button", { class: "btn btn-outline-light", type: "button", "data-action": "copy" }, "Copy my summary")),
+        h("p", { class: "copy-status", id: "copyStatus", role: "status" }),
+        h("textarea", { id: "summaryText", readonly: true, hidden: true, "aria-label": "Your summary, ready to copy" })),
 
-        currentQuestion--;
+      h("div", { class: "replay" },
+        h("button", { class: "btn btn-ghost", type: "button", "data-action": "restart" }, "Play again")));
 
-        renderQuestion();
+    mount(node);
+  }
 
+  /* ---------- Events ---------- */
+  function onClick(e) {
+    var btn = e.target.closest("[data-action]");
+    if (!btn || !stage.contains(btn) || btn.disabled) return;
+    var action = btn.getAttribute("data-action");
+
+    if (action === "start") { state.index = 0; renderStep(); }
+    else if (action === "back") {
+      if (state.index > 0) { state.index--; renderStep(); } else showIntro(true);
+    }
+    else if (action === "next") {
+      if (state.index === 0 && !state.doubt) return;
+      if (state.index === 1 && !state.routine) return;
+      if (state.index >= 2 && !state.guesses[currentOrder()[state.index - 2].id]) return;
+      if (state.index < TOTAL_STEPS - 1) { state.index++; renderStep(); } else renderResults();
+    }
+    else if (action === "guess") {
+      var fact = currentOrder()[state.index - 2];
+      if (!fact || state.guesses[fact.id]) return;
+      state.guesses[fact.id] = btn.getAttribute("data-guess");
+      // Re-render this card in its answered state, then move focus to the explanation.
+      var node = mythStep(fact);
+      stage.replaceChildren(node);
+      var reveal = node.querySelector("#reveal");
+      if (reveal) reveal.focus({ preventScroll: false });
+    }
+    else if (action === "restart") {
+      state = { view: "intro", index: 0, doubt: null, routine: null, guesses: {} };
+      showIntro(true);
+    }
+    else if (action === "copy") copySummary();
+  }
+
+  function onChange(e) {
+    var input = e.target;
+    if (!input || input.type !== "radio") return;
+    if (input.name === "doubt") state.doubt = input.value;
+    if (input.name === "routine") state.routine = input.value;
+    var group = stage.querySelectorAll("input[name=" + input.name + "]");
+    for (var i = 0; i < group.length; i++) {
+      group[i].closest(".option").classList.toggle("is-checked", group[i].checked);
+    }
+    var next = stage.querySelector("[data-action=next]");
+    if (next) next.disabled = false;
+  }
+
+  function copySummary() {
+    var text = buildSummary(state);
+    var status = document.getElementById("copyStatus");
+    var box = document.getElementById("summaryText");
+
+    function fallback() {
+      box.hidden = false;
+      box.value = text;
+      box.focus();
+      box.select();
+      status.textContent = "Couldn't copy automatically. The text is selected, so copy it from here.";
     }
 
-});
-
-
-// ---------- CONTINUE BUTTON ----------
-
-nextButton.addEventListener("click", () => {
-
-    // Do not continue without selecting an answer.
-    if (selectedAnswers[currentQuestion] === null) {
-        return;
-    }
-
-    if (currentQuestion < questions.length - 1) {
-
-        currentQuestion++;
-
-        renderQuestion();
-
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        status.textContent = "Copied. Paste it into WhatsApp or share it with your doctor.";
+      }, fallback);
     } else {
-
-        showResults();
-
+      fallback();
     }
+  }
 
-});
+  /* ---------- Start-up ---------- */
+  function init() {
+    game = document.getElementById("game");
+    stage = document.getElementById("stage");
+    progress = document.getElementById("progress");
+    progressBar = document.getElementById("progressBar");
+    progressLabel = document.getElementById("progressLabel");
+    if (!game || !stage || !progress || !progressBar || !progressLabel) throw new Error("Game markup is missing");
+    var intro = stage.querySelector(".intro");
+    introHTML = intro ? intro.outerHTML : "";
+    if (!introHTML) throw new Error("Intro markup is missing");
+    stage.addEventListener("click", onClick);
+    stage.addEventListener("change", onChange);
+  }
 
+  function start() {
+    try {
+      init();
+    } catch (err) {
+      var stageEl = document.getElementById("stage");
+      if (stageEl) {
+        stageEl.replaceChildren(h("div", { class: "noscript", role: "alert" },
+          h("h2", {}, "Something went wrong"),
+          h("p", {}, "The game didn't load. Please refresh the page and try again.")));
+      }
+      if (window.console) console.error(err);
+    }
+  }
 
-// ---------- DISPLAY RESULTS ----------
-
-function showResults() {
-
-    const scores = {};
-
-    // Count selected topics.
-    selectedAnswers.forEach((answer) => {
-
-        if (answer) {
-
-            scores[answer] = (scores[answer] || 0) + 1;
-
-        }
-
-    });
-
-
-    // Rank topics by the number of selections.
-    const rankedTopics = Object.entries(scores)
-        .sort((a, b) => b[1] - a[1]);
-
-
-    const primaryTopic = rankedTopics[0]?.[0] || "basics";
-
-    const secondaryTopic =
-        rankedTopics.find(([topic]) => topic !== primaryTopic)?.[0]
-        || "research";
-
-
-    const resultTitle = document.getElementById("resultTitle");
-
-    const resultSummary = document.getElementById("resultSummary");
-
-    const recommendationList =
-        document.getElementById("recommendationList");
-
-
-    // Show primary recommendation.
-    resultTitle.textContent =
-        recommendations[primaryTopic].title;
-
-    resultSummary.textContent =
-        "Based on your answers, here are two educational topics to explore. Learn at your own pace and follow the original sources for more information.";
-
-
-    // Clear old recommendations.
-    recommendationList.replaceChildren();
-
-
-    // Display two learning recommendations.
-    [primaryTopic, secondaryTopic].forEach((topic, index) => {
-
-        const recommendation = recommendations[topic];
-
-        const card = document.createElement("article");
-
-        card.className = "recommendation-card";
-
-
-        // Recommendation heading.
-        const heading = document.createElement("h3");
-
-        heading.textContent =
-            `${String(index + 1).padStart(2, "0")} · ${recommendation.title}`;
-
-
-        // Recommendation description.
-        const description = document.createElement("p");
-
-        description.textContent = recommendation.description;
-
-
-        card.append(heading, description);
-
-
-        // Add trusted learning resources.
-        recommendation.links.forEach((link) => {
-
-            const anchor = document.createElement("a");
-
-            anchor.href = link.url;
-            anchor.target = "_blank";
-            anchor.rel = "noopener noreferrer";
-
-            anchor.textContent = `${link.label} ↗`;
-
-            card.appendChild(anchor);
-
-        });
-
-
-        recommendationList.appendChild(card);
-
-    });
-
-
-    // Complete progress bar.
-    progressBar.style.width = "100%";
-
-    // Show recommendations instead of quiz.
-    quizPanel.hidden = true;
-    resultsPanel.hidden = false;
-
-}
-
-
-// ---------- RETAKE QUIZ ----------
-
-document.getElementById("restartButton").addEventListener("click", () => {
-
-    // Clear previous answers.
-    selectedAnswers.fill(null);
-
-    // Return to first question.
-    currentQuestion = 0;
-
-    // Show quiz again.
-    resultsPanel.hidden = true;
-    quizPanel.hidden = false;
-
-    renderQuestion();
-
-});
-
-
-// ---------- INITIALISE WEBSITE ----------
-
-renderQuestion();
-
-filterResearch();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
