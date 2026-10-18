@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Metabolic Mind | Understand Your Body</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <header class="navbar">
+        <div class="container nav-content">
+
+            <a href="#home" class="logo logo-flip">
+
+    <span class="logo-flip-inner">
+
+        <!-- Front Side -->
+        <span class="logo-face logo-front">
+            <span class="logo-icon">M</span>
+            <span>Metabolic <em>Mind</em></span>
+        </span>
+
+        <!-- Back Side -->
+        <span class="logo-face logo-back">
+            <span class="logo-icon steer-icon">S</span>
+            <span class="steer-text">steer</span>
+        </span>
+
+    </span>
+
+</a>
+            <nav class="nav-links" id="navLinks">
+                <a href="#home">Home</a>
+                <a href="#research">Research Radar</a>
+                <a href="#approach">Our Approach</a>
+            </nav>
+
+            <a href="#quiz" class="nav-button">
+                Take the quiz <span>↗</span>
+            </a>
+
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- HERO SECTION -->
+        <section class="hero" id="home">
+
+            <div class="container hero-grid">
+
+                <div class="hero-content">
+
+                    <p class="eyebrow">
+                        <span></span>
+                        Understand your body. Explore the science.
+                    </p>
+
+                    <h1>
+                        Your health is more than a
+                        <em>number.</em>
+                    </h1>
+
+                    <p class="hero-description">
+                        Make sense of metabolic health through clear
+                        educational resources, thoughtful questions,
+                        and research-backed information.
+                    </p>
+
+                    <div class="hero-buttons">
+                        <a href="#quiz" class="button button-dark">
+                            Find your learning path <span>↗</span>
+                        </a>
+
+                        <a href="#research" class="text-link">
+                            Explore the research ↓
+                        </a>
+                    </div>
+
+                    <div class="hero-note">
+                        <span class="note-dot"></span>
+                        Curiosity first. Evidence always. No judgement.
+                    </div>
+
+                </div>
+
+
+                <div class="hero-card">
+
+                    <div class="card-top">
+                        <span>THE BIGGER PICTURE</span>
+                        <span>01 / 03</span>
+                    </div>
+
+                    <div class="hero-art">
+                        <div class="sun"></div>
+                        <div class="hill hill-one"></div>
+                        <div class="hill hill-two"></div>
+                        <div class="plant plant-one"></div>
+                        <div class="plant plant-two"></div>
+                    </div>
+
+                    <p class="small-heading">A MORE HUMAN APPROACH</p>
+
+                    <h2>Understand the <em>why.</em></h2>
+
+                    <p>
+                        Explore how energy, appetite, sleep, movement
+                        and everyday life connect.
+                    </p>
+
+                    <div class="card-footer">
+                        <span>LEARN</span>
+                        <span>EXPLORE</span>
+                        <span>UNDERSTAND</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PRINCIPLES -->
+        <section class="principles">
+            <div class="container principles-content">
+
+                <div>
+                    <span>01</span>
+                    Explore the evidence
+                </div>
+
+                <div>
+                    <span>02</span>
+                    Build your knowledge
+                </div>
+
+                <div>
+                    <span>03</span>
+                    Ask better questions
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- RESEARCH RADAR -->
+        <section class="research section-padding" id="research">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="eyebrow">
+                            <span></span>
+                            The research desk
+                        </p>
+
+                        <h2>Research <em>Radar.</em></h2>
+
+                        <p class="section-description">
+                            Explore trusted educational resources about
+                            metabolic health, nutrition, movement and sleep.
+                        </p>
+                    </div>
+
+                    <div class="issue-label">
+                        <span>FIELD NOTES</span>
+                        <strong>VOL. 01</strong>
+                        <span>SCIENCE & WELLBEING</span>
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH -->
+                <div class="research-tools">
+
+                    <label class="search-box">
+                        <span>⌕</span>
+
+                        <input
+                            type="search"
+                            id="researchSearch"
+                            placeholder="Search topics and resources..."
+                            aria-label="Search research resources">
+                    </label>
+
+
+                    <!-- FILTER BUTTONS -->
+                    <div class="filter-buttons">
+
+                        <button class="filter-chip active"
+                                data-filter="all">
+                            All topics
+                        </button>
+
+                        <button class="filter-chip"
+                                data-filter="basics">
+                            Metabolic basics
+                        </button>
+
+                        <button class="filter-chip"
+                                data-filter="nutrition">
+                            Nutrition
+                        </button>
+
+                        <button class="filter-chip"
+                                data-filter="movement">
+                            Movement
+                        </button>
+
+                        <button class="filter-chip"
+                                data-filter="sleep">
+                            Sleep & habits
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="research-meta">
+                    <span id="resultCount">06 RESOURCES</span>
+                    <span>START WITH CURIOSITY</span>
+                </div>
+
+
+                <!-- RESEARCH CARDS -->
+                <div class="research-grid" id="researchGrid">
+
+                    <article class="research-card"
+                             data-topic="basics"
+                             data-search="metabolism insulin resistance glucose diabetes NIDDK">
+
+                        <div class="resource-top">
+                            <span>METABOLIC BASICS</span>
+                            <span>PUBLIC RESOURCE</span>
+                        </div>
+
+                        <div class="resource-art art-green">
+                            <span>METABOLISM<br>IN CONTEXT</span>
+                        </div>
+
+                        <div class="resource-content">
+
+                            <p class="evidence-type">
+                                <span></span> Health information
+                            </p>
+
+                            <h3>Understanding insulin resistance</h3>
+
+                            <p>
+                                Learn how insulin helps the body use glucose
+                                and why insulin resistance matters.
+                            </p>
+
+                            <div class="resource-footer">
+                                <span>Source · NIDDK</span>
+
+                                <a href="https://www.niddk.nih.gov/health-information/diabetes/overview/what-is-diabetes/prediabetes-insulin-resistance"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Read resource ↗
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+
+
+                    <article class="research-card"
+                             data-topic="basics"
+                             data-search="metabolic syndrome health risk factors CDC">
+
+                        <div class="resource-top">
+                            <span>METABOLIC BASICS</span>
+                            <span>PUBLIC RESOURCE</span>
+                        </div>
+
+                        <div class="resource-art art-rust">
+                            <span>THE WHOLE<br>PICTURE</span>
+                        </div>
+
+                        <div class="resource-content">
+
+                            <p class="evidence-type">
+                                <span></span> Health information
+                            </p>
+
+                            <h3>Seeing the bigger picture</h3>
+
+                            <p>
+                                Explore reputable public-health information
+                                and learn why health involves multiple factors.
+                            </p>
+
+                            <div class="resource-footer">
+                                <span>Source · CDC</span>
+
+                                <a href="https://www.cdc.gov/"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Visit source ↗
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+
+
+                    <article class="research-card"
+                             data-topic="nutrition"
+                             data-search="healthy diet food nutrition WHO vegetables fruits">
+
+                        <div class="resource-top">
+                            <span>NUTRITION</span>
+                            <span>PUBLIC RESOURCE</span>
+                        </div>
+
+                        <div class="resource-art art-gold">
+                            <span>FOOD &<br>EVERYDAY LIFE</span>
+                        </div>
+
+                        <div class="resource-content">
+
+                            <p class="evidence-type">
+                                <span></span> Public-health guidance
+                            </p>
+
+                            <h3>What is a balanced diet?</h3>
+
+                            <p>
+                                Explore dietary variety, fruits, vegetables,
+                                whole grains and healthy-eating guidance.
+                            </p>
+
+                            <div class="resource-footer">
+                                <span>Source · WHO</span>
+
+                                <a href="https://www.who.int/news-room/fact-sheets/detail/healthy-diet"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Read guidance ↗
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+
+
+                    <article class="research-card"
+                             data-topic="movement"
+                             data-search="physical activity exercise movement strength WHO">
+
+                        <div class="resource-top">
+                            <span>MOVEMENT</span>
+                            <span>GUIDELINES</span>
+                        </div>
+
+                        <div class="resource-art art-blue">
+                            <span>MOVE IN<br>YOUR OWN WAY</span>
+                        </div>
+
+                        <div class="resource-content">
+
+                            <p class="evidence-type">
+                                <span></span> Public-health guidance
+                            </p>
+
+                            <h3>Movement beyond the gym</h3>
+
+                            <p>
+                                Explore physical-activity recommendations
+                                and ways movement can fit everyday life.
+                            </p>
+
+                            <div class="resource-footer">
+                                <span>Source · WHO</span>
+
+                                <a href="https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Read guidance ↗
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+
+
+                    <article class="research-card"
+                             data-topic="sleep"
+                             data-search="sleep healthy habits rest CDC">
+
+                        <div class="resource-top">
+                            <span>SLEEP & HABITS</span>
+                            <span>PUBLIC RESOURCE</span>
+                        </div>
+
+                        <div class="resource-art art-purple">
+                            <span>REST IS<br>PART OF HEALTH</span>
+                        </div>
+
+                        <div class="resource-content">
+
+                            <p class="evidence-type">
+                                <span></span> Health information
+                            </p>
+
+                            <h3>Why sleep matters</h3>
+
+                            <p>
+                                Explore basic sleep-health information
+                                and everyday sleep habits.
+                            </p>
+
+                            <div class="resource-footer">
+                                <span>Source · CDC</span>
+
+                                <a href="https://www.cdc.gov/sleep/"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Explore source ↗
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+
+
+                    <article class="research-card"
+                             data-topic="nutrition"
+                             data-search="scientific papers research studies PubMed literature database">
+
+                        <div class="resource-top">
+                            <span>RESEARCH SKILLS</span>
+                            <span>LITERATURE DATABASE</span>
+                        </div>
+
+                        <div class="resource-art art-olive">
+                            <span>FOLLOW<br>THE EVIDENCE</span>
+                        </div>
+
+                        <div class="resource-content">
+
+                            <p class="evidence-type">
+                                <span></span> Research database
+                            </p>
+
+                            <h3>Explore published studies</h3>
+
+                            <p>
+                                Search scientific literature and learn to
+                                look beyond headlines when reading studies.
+                            </p>
+
+                            <div class="resource-footer">
+                                <span>Source · PubMed</span>
+
+                                <a href="https://pubmed.ncbi.nlm.nih.gov/"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Search papers ↗
+                                </a>
+                            </div>
+
+                        </div>
+                    </article>
+
+                </div>
+
+
+                <div class="empty-state" id="emptyState" hidden>
+                    <h3>No resources found</h3>
+                    <p>Try another search term or select All topics.</p>
+                </div>
+
+
+                <p class="disclaimer">
+                    <strong>Editorial note:</strong>
+                    These links are educational starting points, not
+                    individual medical advice. Resource types are labelled
+                    clearly; not every link is an individual research paper.
+                </p>
+
+            </div>
+        </section>
+
+
+        <!-- QUIZ -->
+        <section class="quiz-section section-padding" id="quiz">
+
+            <div class="container quiz-layout">
+
+                <div class="quiz-intro">
+
+                    <p class="eyebrow">
+                        <span></span>
+                        Your learning path
+                    </p>
+
+                    <h2>
+                        Start with what you want to
+                        <em>understand.</em>
+                    </h2>
+
+                    <p>
+                        Answer five simple questions to receive a suggested
+                        educational learning path.
+                    </p>
+
+                    <div class="quiz-note">
+                        <strong>✳ Remember</strong>
+
+                        <p>
+                            This quiz is educational. It does not diagnose
+                            a condition or replace professional medical advice.
+                        </p>
+                    </div>
+
+                    <a href="#research" class="text-link">
+                        ← Explore research first
+                    </a>
+
+                </div>
+
+
+                <!-- QUIZ QUESTIONS -->
+                <div class="quiz-panel" id="quizPanel">
+
+                    <div class="quiz-top">
+                        <span id="quizStepLabel">QUESTION 01</span>
+                        <span id="quizStepCount">1 OF 5</span>
+                    </div>
+
+                    <div class="progress-track">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+
+                    <div id="questionArea">
+
+                        <h3 id="questionTitle">
+                            What would you most like to understand?
+                        </h3>
+
+                        <p id="questionHelp">
+                            Choose the topic that feels most useful to you.
+                        </p>
+
+                        <div class="answer-list" id="answerList"></div>
+
+                    </div>
+
+                    <div class="quiz-controls">
+
+                        <button class="button button-light"
+                                id="backButton"
+                                disabled>
+                            ← Back
+                        </button>
+
+                        <button class="button button-dark"
+                                id="nextButton"
+                                disabled>
+                            Continue →
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- QUIZ RESULTS -->
+                <div class="results-panel" id="resultsPanel" hidden>
+
+                    <p class="eyebrow">
+                        <span></span>
+                        A place to begin
+                    </p>
+
+                    <h2 id="resultTitle">Your learning path</h2>
+
+                    <p id="resultSummary"></p>
+
+                    <div id="recommendationList"></div>
+
+                    <div class="results-buttons">
+
+                        <a href="#research" class="button button-dark">
+                            Explore resources ↗
+                        </a>
+
+                        <button class="button button-light"
+                                id="restartButton">
+                            Retake quiz ↻
+                        </button>
+
+                    </div>
+
+                    <p class="results-disclaimer">
+                        Educational suggestions only — not a medical assessment.
+                    </p>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- OUR APPROACH -->
+        <section class="approach section-padding" id="approach">
+
+            <div class="container">
+
+                <div class="approach-heading">
+
+                    <p class="eyebrow">
+                        <span></span>
+                        Our editorial principles
+                    </p>
+
+                    <h2>
+                        Less noise. More
+                        <em>understanding.</em>
+                    </h2>
+
+                </div>
+
+
+                <div class="approach-grid">
+
+                    <article>
+                        <span class="principle-number">01</span>
+                        <h3>Evidence over hype</h3>
+                        <p>
+                            Explore reputable health organisations and
+                            scientific resources instead of bold promises.
+                        </p>
+                    </article>
+
+                    <article>
+                        <span class="principle-number">02</span>
+                        <h3>Context matters</h3>
+                        <p>
+                            One study rarely tells the whole story.
+                            Understand what was studied and its limitations.
+                        </p>
+                    </article>
+
+                    <article>
+                        <span class="principle-number">03</span>
+                        <h3>People, not numbers</h3>
+                        <p>
+                            Health is personal and complex. Learn to ask
+                            better questions without labelling yourself.
+                        </p>
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- FINAL CTA -->
+        <section class="closing-section">
+
+            <div class="container">
+
+                <p class="eyebrow">
+                    <span></span>
+                    Keep asking better questions
+                </p>
+
+                <h2>
+                    Knowledge is a good place to
+                    <em>begin.</em>
+                </h2>
+
+                <a href="#research" class="button button-light">
+                    Return to Research Radar ↗
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <div class="container footer-content">
+
+            <a href="#home" class="logo">
+                <span class="logo-icon">M</span>
+                <span>Metabolic <em>Mind</em></span>
+            </a>
+
+            <p>
+                An educational project for curious minds.
+                Not a substitute for professional medical care.
+            </p>
+
+            <div class="footer-links">
+                <a href="#home">Home</a>
+                <a href="#research">Research</a>
+                <a href="#quiz">Learning quiz</a>
+            </div>
+
+        </div>
+
+        <div class="container footer-bottom">
+            <span>© 2026 Metabolic Mind · Educational prototype</span>
+            <span>Made for curious minds, with care.</span>
+        </div>
+
+    </footer>
+
+</body>
+</html>
